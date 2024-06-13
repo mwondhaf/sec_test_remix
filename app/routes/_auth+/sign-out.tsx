@@ -1,5 +1,6 @@
 import { redirect } from "@remix-run/node";
 import type { ActionFunctionArgs } from "@remix-run/node";
+import { profileSession, profileSessionData } from "~/session";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {

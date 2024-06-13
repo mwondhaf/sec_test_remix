@@ -3,10 +3,11 @@ import { Session, createCookieSessionStorage } from "@remix-run/node"; // or clo
 import { Profile } from "types";
 
 type SessionData = {
-  profile: Profile;
+  profiles: Profile[];
+  active_profile: Profile;
 };
 
-export const userSession = createCookieSessionStorage<SessionData>({
+export const profileSession = createCookieSessionStorage<SessionData>({
   cookie: {
     name: "__profile",
     httpOnly: true,
@@ -21,13 +22,18 @@ export const userSession = createCookieSessionStorage<SessionData>({
 export const profileSessionData = async (
   request: Request
 ): Promise<{
-  profile?: Profile;
+  profiles?: Profile[];
+  active_profile?: Profile;
   session: Session<SessionData, SessionData>;
 }> => {
-  const session = await userSession.getSession(request.headers.get("Cookie"));
+  console.log("setting --");
+  const session = await profileSession.getSession(
+    request.headers.get("Cookie")
+  );
 
   return {
-    profile: session.get("profile"),
+    profiles: session.get("profiles"),
+    active_profile: session.get("active_profile"),
     session,
   };
 };

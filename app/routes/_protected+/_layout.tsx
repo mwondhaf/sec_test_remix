@@ -1,10 +1,12 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { Outlet, json, redirect } from "@remix-run/react";
-import { profileSessionData } from "~/session";
+import { Outlet, json, redirect, useLoaderData } from "@remix-run/react";
+import { Profile } from "types";
+import { Sidebar } from "~/components";
+import { profileSession, profileSessionData } from "~/session";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = profileSessionData(request);
+  const { session, active_profile } = await profileSessionData(request);
   const { supabaseClient } = createSupabaseServerClient(request);
   const {
     data: { user },
@@ -14,30 +16,42 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     return redirect("/sign-in");
   }
 
-  const { data } = await supabaseClient
-    .from("profiles")
-    .select("*")
-    .eq("email", user.email);
-  // check if user has an active profile
+  if (!active_profile) {
+    const { data } = await supabaseClient
+      .from("profiles")
+      .select(`*, entities(*)`)
+      .eq("email", user.email);
+    // check if user has an active profile
 
-  if (!data || data?.length === 0) {
-    return redirect(`/create-profile?email=${user.email}`);
+    if (!data || data?.length === 0) {
+      return redirect(`/create-profile?email=${user.email}`);
+    }
+
+    if (data.length >= 1) {
+      session.set("profiles", data);
+
+      return redirect("/select-profile", {
+        headers: {
+          "Set-Cookie": await profileSession.commitSession(session),
+        },
+      });
+    }
   }
-
-  if (data.length > 1) {
-    return redirect("/select-profile");
-  }
-
-  // console.log({ data });
-  // console.log({ error });
-
-  return json({ user });
+  return json({ user, active_profile });
 };
 
 const _layout = () => {
+  const { active_profile } = useLoaderData<{ active_profile: Profile }>();
   return (
     <div>
-      <Outlet />
+      <div className="grid grid-cols-4 h-screen">
+        <div>
+          <Sidebar {...{ profile: active_profile }} />
+        </div>
+        <div className="col-span-3 border-l">
+          <Outlet />
+        </div>
+      </div>
     </div>
   );
 };

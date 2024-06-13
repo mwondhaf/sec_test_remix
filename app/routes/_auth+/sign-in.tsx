@@ -46,6 +46,10 @@ const SignIn = () => {
   } = useRemixForm<FormData>({
     mode: "onSubmit",
     resolver,
+    defaultValues: {
+      email: "rem@mail.com",
+      password: "password",
+    },
   });
 
   return (

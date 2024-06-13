@@ -20,9 +20,8 @@ import { createSupabaseServerClient } from "~/supabase.server";
 type FormData = zod.infer<typeof createProfileSchema>;
 const resolver = zodResolver(createProfileSchema);
 
-export const action = async ({ request, params }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const { supabaseClient, headers } = createSupabaseServerClient(request);
-  console.log({ params });
 
   const {
     errors,
