@@ -7,6 +7,7 @@ const _layout = () => {
       <div className="flex flex-col">
         <Link to="/settings">Settings</Link>
         <Link to="/settings/incident-types">Incident Types</Link>
+        <Link to="/settings/departments">Departments</Link>
       </div>
       <div className="col-span-2 overflow-y-scroll h-screen border-l">
         <Outlet />

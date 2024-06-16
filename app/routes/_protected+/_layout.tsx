@@ -37,18 +37,25 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       });
     }
   }
-  return json({ user, active_profile });
+  return json(
+    { user, active_profile },
+    {
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    }
+  );
 };
 
 const _layout = () => {
   const { active_profile } = useLoaderData<{ active_profile: Profile }>();
   return (
     <div>
-      <div className="grid grid-cols-4 h-screen">
-        <div>
+      <div className="grid grid-cols-5 h-screen">
+        <div className="col-span-1">
           <Sidebar {...{ profile: active_profile }} />
         </div>
-        <div className="col-span-3 border-l">
+        <div className="col-span-4 border-l">
           <Outlet />
         </div>
       </div>

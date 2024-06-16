@@ -25,9 +25,10 @@ export type Profile = {
 };
 
 export type Incident = {
-  readonly id: string;
+  readonly id: number;
   title: string;
   description: string;
+  incident_time: string;
   status: "OPEN" | "CLOSED";
   createdBy: Profile;
   createdDate: string;
@@ -43,4 +44,9 @@ export type IncidentCategory = {
   readonly id: number;
   name: string;
   incident_type_id: number;
+};
+
+export type Department = {
+  readonly id: number;
+  name: string;
 };
