@@ -24,15 +24,28 @@ export type Profile = {
   employeeType: "INHOUSE" | "OTHER" | "CONTRACTOR";
 };
 
+enum Severity {
+  "Low",
+  "Medium",
+  "High",
+}
+
 export type Incident = {
   readonly id: number;
-  title: string;
   description: string;
   incident_time: string;
-  status: "OPEN" | "CLOSED";
-  createdBy: Profile;
-  createdDate: string;
-  updatedDate: string;
+  incident_close_time: string;
+  severity: Severity;
+  incident_location: string;
+  category_id: number;
+  reporter_dept: string;
+  reporter_name: string;
+  action: string;
+  updated_at: string;
+  category?: IncidentCategory;
+  reporter_department?: Department;
+  compiler?: Profile;
+  editor?: Profile;
 };
 
 export type IncidentType = {

@@ -8,6 +8,7 @@ import { createSupabaseServerClient } from "~/supabase.server";
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session, active_profile } = await profileSessionData(request);
   const { supabaseClient } = createSupabaseServerClient(request);
+
   const {
     data: { user },
   } = await supabaseClient.auth.getUser();
@@ -37,8 +38,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       });
     }
   }
+
   return json(
-    { user, active_profile },
+    { active_profile },
     {
       headers: {
         "Cache-Control": "no-cache",
@@ -50,14 +52,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 const _layout = () => {
   const { active_profile } = useLoaderData<{ active_profile: Profile }>();
   return (
-    <div>
-      <div className="grid grid-cols-5 h-screen">
-        <div className="col-span-1">
-          <Sidebar {...{ profile: active_profile }} />
-        </div>
-        <div className="col-span-4 border-l">
-          <Outlet />
-        </div>
+    <div className="grid grid-cols-5 max-h-screen min-h-screen overscroll-none">
+      <div className="col-span-1">
+        <Sidebar {...{ profile: active_profile }} />
+      </div>
+      <div className="col-span-4 border-l">
+        <Outlet />
       </div>
     </div>
   );

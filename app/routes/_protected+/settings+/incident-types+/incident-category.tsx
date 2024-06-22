@@ -13,14 +13,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   switch (action) {
     case "delete_cat":
       await supabaseClient
-        .from("incident-categories")
+        .from("incident_categories")
         .delete()
         .eq("id", cat_id);
 
       return redirect("/settings/incident-types");
     default:
       const { error } = await supabaseClient
-        .from("incident-categories")
+        .from("incident_categories")
         .insert({ name, incident_type_id });
 
       if (!error) {

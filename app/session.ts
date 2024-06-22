@@ -11,10 +11,10 @@ export const profileSession = createCookieSessionStorage<SessionData>({
   cookie: {
     name: "__profile",
     httpOnly: true,
-    maxAge: 60_4800,
+    maxAge: 86_400,
     path: "/",
     sameSite: "lax",
-    secrets: ["s3cret1"],
+    secrets: ["s3cret1"], //TODO Change this
     secure: true,
   },
 });
@@ -26,7 +26,6 @@ export const profileSessionData = async (
   active_profile?: Profile;
   session: Session<SessionData, SessionData>;
 }> => {
-  console.log("setting --");
   const session = await profileSession.getSession(
     request.headers.get("Cookie")
   );

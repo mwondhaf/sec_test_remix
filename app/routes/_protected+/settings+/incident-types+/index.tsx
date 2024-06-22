@@ -1,16 +1,19 @@
-import {
-  Accordion,
-  AccordionItem,
-  Button,
-  Chip,
-  Divider,
-} from "@nextui-org/react";
+import { Accordion, AccordionItem, Button, Divider } from "@nextui-org/react";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { Form, json, useLoaderData } from "@remix-run/react";
-import { IncidentCategory, IncidentType } from "types";
+import {
+  ClientLoaderFunctionArgs,
+  Form,
+  json,
+  useLoaderData,
+} from "@remix-run/react";
+import { IncidentCategory } from "types";
 import { CreateIncidentCategory, CreateIncidentType } from "~/components";
 import { createSupabaseServerClient } from "~/supabase.server";
+import {
+  getIncidentTypes,
+  setIncidentTypesArray,
+} from "~/utils/cache/dexie-cache";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { supabaseClient } = createSupabaseServerClient(request);
@@ -19,7 +22,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     .select("*");
 
   const { data: categories, error: error2 } = await supabaseClient
-    .from("incident-categories")
+    .from("incident_categories")
     .select("*");
 
   if (error || error2) {
@@ -41,6 +44,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     error: null,
   });
 };
+
+export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
+  const cachedIncidentTypes = await getIncidentTypes();
+
+  if (cachedIncidentTypes.length > 0)
+    return json({ incident_types: cachedIncidentTypes });
+
+  // @ts-ignore
+  let { data } = await serverLoader();
+
+  await setIncidentTypesArray(data);
+
+  return { data };
+}
+
+clientLoader.hydrate = true;
 
 const IncidentTypes = () => {
   const { data, error } = useLoaderData<typeof loader>();

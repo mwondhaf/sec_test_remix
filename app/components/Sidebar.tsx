@@ -1,4 +1,10 @@
 import {
+  ZonedDateTime,
+  getLocalTimeZone,
+  now,
+  toCalendarDateTime,
+} from "@internationalized/date";
+import {
   Button,
   Dropdown,
   DropdownItem,
@@ -14,6 +20,7 @@ import {
   PlusIcon,
 } from "@radix-ui/react-icons";
 import { Form, Link } from "@remix-run/react";
+import dayjs from "dayjs";
 import React from "react";
 import { Profile } from "types";
 
@@ -49,7 +56,7 @@ const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
             radius="full"
             color="primary"
             as={Link}
-            to="/new-incident"
+            to={`/new-incident`}
             startContent={<PlusIcon />}
             className="flex justify-start"
           >

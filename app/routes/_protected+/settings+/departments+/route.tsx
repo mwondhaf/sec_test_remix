@@ -1,10 +1,15 @@
 import { Button } from "@nextui-org/react";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { LoaderFunctionArgs, json } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import {
+  ClientLoaderFunctionArgs,
+  useFetcher,
+  useLoaderData,
+} from "@remix-run/react";
 import { Department } from "types";
 import { CreateDepartment } from "~/components";
 import { createSupabaseServerClient } from "~/supabase.server";
+import { getAllDepartments } from "~/utils/cache/dexie-cache";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { supabaseClient } = createSupabaseServerClient(request);
@@ -17,6 +22,20 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({
     data,
   });
+};
+
+export const clientLoader = async ({
+  serverLoader,
+}: ClientLoaderFunctionArgs) => {
+  let cachedDepts = await getAllDepartments();
+  if (cachedDepts.length > 0) {
+    return { data: cachedDepts };
+  }
+
+  // @ts-ignore
+  let { data } = await serverLoader();
+
+  return { data };
 };
 
 export const action = async ({ request }: LoaderFunctionArgs) => {

@@ -25,10 +25,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createIncidentSchema } from "~/form-schemas";
 import { getValidatedFormData, useRemixForm } from "remix-hook-form";
 import { Controller } from "react-hook-form";
-import { Form, useLoaderData } from "@remix-run/react";
+import {
+  ClientLoaderFunctionArgs,
+  Form,
+  useLoaderData,
+  useParams,
+  useSearchParams,
+} from "@remix-run/react";
 import dayjs from "dayjs";
 import { profileSessionData } from "~/session";
-import { getCache, setCache } from "~/utils/cache/localforage-cache";
+import {
+  getAllCategories,
+  getAllDepartments,
+  setCategoriesArray,
+  setDepartmentsArray,
+} from "~/utils/cache/dexie-cache";
 
 type FormData = zod.infer<typeof createIncidentSchema>;
 const resolver = zodResolver(createIncidentSchema);
@@ -36,8 +47,12 @@ const resolver = zodResolver(createIncidentSchema);
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { supabaseClient } = createSupabaseServerClient(request);
 
+  const url = new URL(request.url);
+  const inc_time = url.searchParams.get("inc_time");
+  const close_time = url.searchParams.get("close_time");
+
   const { data: categories, error } = await supabaseClient
-    .from("incident-categories")
+    .from("incident_categories")
     .select("*");
 
   const { data: departments, error: error2 } = await supabaseClient
@@ -45,22 +60,43 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     .select("*");
 
   if (error || error2) {
-    return json({ categories: [], departments: [] });
+    return json({ categories: [], departments: [], inc_time, close_time });
   }
 
-  return json(
-    { categories, departments },
-    {
-      headers: {
-        "Cache-Control": "public, max-age=86400",
-      },
-    }
-  );
+  return json({ categories, departments, inc_time, close_time });
 };
+
+export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
+  const [cachedCats, cachedDepts] = await Promise.all([
+    getAllCategories(),
+    getAllDepartments(),
+  ]);
+
+  if (cachedDepts.length > 0 && cachedCats.length > 0) {
+    return { departments: cachedDepts, categories: cachedCats };
+  }
+
+  // @ts-ignore
+  let { departments, categories } = await serverLoader();
+
+  await Promise.all([
+    setDepartmentsArray(departments),
+    setCategoriesArray(categories),
+  ]);
+
+  return { departments, categories };
+}
+
+clientLoader.hydrate = true;
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { supabaseClient } = createSupabaseServerClient(request);
   const { active_profile } = await profileSessionData(request);
+
+  const url = new URL(request.url);
+  const inc_time = url.searchParams.get("inc_time");
+  const close_time = url.searchParams.get("close_time");
+
   const {
     errors,
     data: formData,
@@ -77,6 +113,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       ...formData,
       entity_id: active_profile?.entities.id,
       compiler_id: active_profile?.id,
+      incident_close_time: close_time,
+      incident_time: inc_time,
     })
     .select()
     .single();
@@ -84,19 +122,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (error) {
     return json({ error });
   }
-
-  // Update the localforage cache with the new incident
-  const cacheKey = "incidents";
-  let cachedIncidents = (await getCache(cacheKey)) ?? [];
-
-  console.log({ cachedIncidents });
-
-  // cachedIncidents = [...cachedIncidents, data]; // Add the new incident
-  // await setCache(cacheKey, cachedIncidents);
-
-  // if (!incidents) incidents = [];
-  // incidents.push(data);
-  // await setCache(cacheKey, incidents);
 
   return redirect(`/incidents/${data.id}`);
 };
@@ -115,30 +140,25 @@ enum Severity {
 
 const NewIncident = () => {
   const data = useLoaderData<typeof loader>();
-  const dateTimeNow = new Date().toISOString();
-  const [date, setDate] = React.useState(parseAbsoluteToLocal(dateTimeNow));
-  const [closeTime, setCloseTime] = React.useState(
-    parseAbsoluteToLocal(dateTimeNow)
-  );
-
-  let [incidentTime, setIncidentTime] = React.useState<string | undefined>(
-    calculateDateTime(date)
-  );
-
-  let [incidentCloseTime, setIncidentCloseTime] = React.useState<
-    string | undefined
-  >(calculateDateTime(date));
+  const dateTimeNow = now(getLocalTimeZone());
+  const [date, setDate] = React.useState(dateTimeNow);
+  const [closeTime, setCloseTime] = React.useState(dateTimeNow);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    if (date) {
-      const cal = calculateDateTime(date);
-      setIncidentTime(cal);
-    }
-    if (closeTime) {
-      const cal = calculateDateTime(closeTime);
-      setIncidentCloseTime(cal);
-    }
-  }, [date, closeTime]);
+    setSearchParams((prev) => {
+      prev.set("inc_time", calculateDateTime(date));
+      return prev;
+    });
+  }, [date]);
+
+  useEffect(() => {
+    // setIncidentCloseTime(calculateDateTime(closeTime));
+    setSearchParams((prev) => {
+      prev.set("close_time", calculateDateTime(closeTime));
+      return prev;
+    });
+  }, [closeTime]);
 
   const {
     handleSubmit,
@@ -149,8 +169,6 @@ const NewIncident = () => {
     mode: "onSubmit",
     resolver,
     defaultValues: {
-      incident_time: incidentTime,
-      incident_close_time: incidentCloseTime,
       severity: Severity.Low,
     },
   });
@@ -161,26 +179,18 @@ const NewIncident = () => {
       <Form method="post" onSubmit={handleSubmit}>
         <div className="">
           <div className="grid grid-cols-4 gap-4">
-            <input name="incident_time" type="hidden" value={incidentTime} />
-            <input
-              name="incident_close_time"
-              type="hidden"
-              value={incidentCloseTime}
-            />
             <DatePicker
               label="Incident Date & Time"
               variant="bordered"
               hideTimeZone
               showMonthAndYearPickers
               hourCycle={24}
-              defaultValue={now(getLocalTimeZone())}
               value={date}
               onChange={setDate}
               minValue={now(getLocalTimeZone()).subtract({ hours: 12 })}
               maxValue={now(getLocalTimeZone())}
-              isInvalid={!!errors.incident_time?.message}
-              errorMessage={errors?.incident_time?.message?.toString()}
-              isRequired
+              // isInvalid={!!errors.incident_time?.message}
+              // errorMessage={errors?.incident_time?.message?.toString()}
             />
             <Controller
               name="incident_location"
@@ -289,17 +299,16 @@ const NewIncident = () => {
               hideTimeZone
               showMonthAndYearPickers
               hourCycle={24}
-              defaultValue={now(getLocalTimeZone())}
               value={closeTime}
               onChange={setCloseTime}
-              // minValue={now(getLocalTimeZone()).subtract({ hours: 12 })}
               minValue={
-                incidentTime ? parseAbsoluteToLocal(incidentTime) : undefined
+                data.inc_time ? parseAbsoluteToLocal(data.inc_time!) : undefined
               }
               maxValue={now(getLocalTimeZone())}
-              isInvalid={!!errors.incident_close_time?.message}
-              errorMessage={errors?.incident_close_time?.message?.toString()}
-              isRequired
+              isInvalid={
+                data.close_time?.toString()! < data.inc_time?.toString()!
+              }
+              errorMessage={"errors?.incident_close_time?.message?.toString()"}
             />
             <Controller
               name="severity"
@@ -313,18 +322,19 @@ const NewIncident = () => {
                   isInvalid={!!errors.severity?.message}
                   errorMessage={errors?.severity?.message?.toString()}
                 >
-                  {/* Map over the Severity enum values */}
-                  {Object.values(Severity).map((level) => (
-                    <SelectItem key={level} value={level}>
-                      {level}
+                  {Object.values(Severity).map((severity) => (
+                    <SelectItem key={severity} value={severity}>
+                      {severity}
                     </SelectItem>
                   ))}
                 </Select>
               )}
             />
           </div>
-          <Button type="submit">Create</Button>
         </div>
+        <Button type="submit" color="primary">
+          Submit
+        </Button>
       </Form>
     </div>
   );
