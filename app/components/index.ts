@@ -5,6 +5,7 @@ import Sidebar from "./Sidebar";
 import DetailTopBar from "./incidents/DetailTopBar";
 import FilterBar from "./incidents/FilterBar";
 import ListIncident from "./incidents/ListIncident";
+import PeopleInvolvedList from "./incidents/PeopleInvolvedList";
 export {
   Sidebar,
   CreateIncidentCategory,
@@ -13,4 +14,5 @@ export {
   FilterBar,
   ListIncident,
   DetailTopBar,
+  PeopleInvolvedList,
 };

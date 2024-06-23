@@ -4,6 +4,7 @@ import {
   Input,
   Select,
   SelectItem,
+  Textarea,
 } from "@nextui-org/react";
 import {
   ActionFunctionArgs,
@@ -174,8 +175,8 @@ const NewIncident = () => {
   });
 
   return (
-    <div>
-      <h1>New Incident</h1>
+    <div className="p-4 space-y-4">
+      <h3 className="text-2xl font-bold text-gray-700">New Incident</h3>
       <Form method="post" onSubmit={handleSubmit}>
         <div className="">
           <div className="grid grid-cols-4 gap-4">
@@ -189,8 +190,47 @@ const NewIncident = () => {
               onChange={setDate}
               minValue={now(getLocalTimeZone()).subtract({ hours: 12 })}
               maxValue={now(getLocalTimeZone())}
-              // isInvalid={!!errors.incident_time?.message}
-              // errorMessage={errors?.incident_time?.message?.toString()}
+            />
+            <div className="col-span-2">
+              <Controller
+                name="category_id"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Select
+                    items={data.categories}
+                    label="Incident Category"
+                    placeholder="Select a category"
+                    {...field}
+                    isInvalid={!!errors.category_id?.message}
+                    errorMessage={errors?.category_id?.message?.toString()}
+                  >
+                    {(category) => (
+                      <SelectItem key={category.id}>{category.name}</SelectItem>
+                    )}
+                  </Select>
+                )}
+              />
+            </div>
+            <Controller
+              name="severity"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select
+                  label="Incident Severity"
+                  placeholder="Select severity"
+                  {...field}
+                  isInvalid={!!errors.severity?.message}
+                  errorMessage={errors?.severity?.message?.toString()}
+                >
+                  {Object.values(Severity).map((severity) => (
+                    <SelectItem key={severity} value={severity}>
+                      {severity}
+                    </SelectItem>
+                  ))}
+                </Select>
+              )}
             />
             <Controller
               name="incident_location"
@@ -206,40 +246,22 @@ const NewIncident = () => {
                 />
               )}
             />
-            <Controller
-              name="category_id"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Select
-                  items={data.categories}
-                  label="Category"
-                  placeholder="Select a category"
-                  {...field}
-                  isInvalid={!!errors.category_id?.message}
-                  errorMessage={errors?.category_id?.message?.toString()}
-                >
-                  {(category) => (
-                    <SelectItem key={category.id}>{category.name}</SelectItem>
-                  )}
-                </Select>
-              )}
-            />
-
-            <Controller
-              name="reporter_name"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input
-                  label="Reporter Name"
-                  {...field}
-                  isRequired
-                  isInvalid={!!errors.reporter_name?.message}
-                  errorMessage={errors?.reporter_name?.message?.toString()}
-                />
-              )}
-            />
+            <div className="col-span-2">
+              <Controller
+                name="reporter_name"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Input
+                    label="Reporter Name"
+                    {...field}
+                    isRequired
+                    isInvalid={!!errors.reporter_name?.message}
+                    errorMessage={errors?.reporter_name?.message?.toString()}
+                  />
+                )}
+              />
+            </div>
             <Controller
               name="reporter_dept"
               control={control}
@@ -267,7 +289,7 @@ const NewIncident = () => {
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
-                  <Input
+                  <Textarea
                     label="Description"
                     {...field}
                     isRequired
@@ -283,8 +305,8 @@ const NewIncident = () => {
                 control={control}
                 rules={{ required: true }}
                 render={({ field }) => (
-                  <Input
-                    label="Action"
+                  <Textarea
+                    label="Action Taken or Investigation"
                     {...field}
                     isRequired
                     isInvalid={!!errors.action?.message}
@@ -310,30 +332,10 @@ const NewIncident = () => {
               }
               errorMessage={"errors?.incident_close_time?.message?.toString()"}
             />
-            <Controller
-              name="severity"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Select
-                  label="Severity"
-                  placeholder="Select severity"
-                  {...field}
-                  isInvalid={!!errors.severity?.message}
-                  errorMessage={errors?.severity?.message?.toString()}
-                >
-                  {Object.values(Severity).map((severity) => (
-                    <SelectItem key={severity} value={severity}>
-                      {severity}
-                    </SelectItem>
-                  ))}
-                </Select>
-              )}
-            />
           </div>
         </div>
-        <Button type="submit" color="primary">
-          Submit
+        <Button type="submit" color="primary" size="lg">
+          Create Incident
         </Button>
       </Form>
     </div>

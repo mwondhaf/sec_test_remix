@@ -1,13 +1,19 @@
 import Dexie from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Department, Incident, IncidentCategory, IncidentType } from "types";
+import {
+  Department,
+  Incident,
+  IncidentCategory,
+  IncidentType,
+  PersonInvolved,
+} from "types";
 import {
   createIncidentSchema,
   departmentSchema,
   incidentCategorySchema,
+  personInvolvedSchema,
 } from "~/form-schemas";
 import { incidentTypeSchema } from "~/form-schemas/incident-type";
-import IncidentTypes from "~/routes/_protected+/settings+/incident-types+";
 
 // Define your Dexie database schema
 class CacheDatabase extends Dexie {
@@ -15,6 +21,7 @@ class CacheDatabase extends Dexie {
   incident_categories: Dexie.Table<IncidentCategory, number>;
   departments: Dexie.Table<Department, number>;
   incident_types: Dexie.Table<IncidentType, number>;
+  people_involved: Dexie.Table<PersonInvolved, number>;
 
   constructor() {
     super("CacheDatabase");
@@ -23,11 +30,13 @@ class CacheDatabase extends Dexie {
       incident_categories: "id",
       departments: "id",
       incident_types: "id",
+      people_involved: "incident_id",
     });
     this.incidents = this.table("incidents");
     this.incident_categories = this.table("incident_categories");
     this.departments = this.table("departments");
     this.incident_types = this.table("incident_types");
+    this.people_involved = this.table("people_involved");
   }
 }
 
@@ -86,7 +95,6 @@ export const setIncidentsArray = async (incidents: Incident[]) => {
     incidents.forEach((incident) => createIncidentSchema.parse(incident));
 
     await db.incidents.bulkPut(incidents);
-    console.log("Incidents array set in cache.");
   } catch (error) {
     console.error("Error setting incidents array in cache:", error);
   }
@@ -97,11 +105,9 @@ export const getAllIncidents = async (): Promise<Incident[]> => {
     const allIncidents = useLiveQuery(async () => {
       return await db.incidents.toArray();
     });
-    console.log("xs");
 
     // Validate each incident retrieved from the database
     allIncidents?.forEach((incident) => createIncidentSchema.parse(incident));
-    console.log("got");
 
     return allIncidents ? allIncidents : [];
   } catch (error) {
@@ -208,6 +214,43 @@ export const getIncidentsBySeverity = async (
     return incidents;
   } catch (error) {
     console.error("Error getting incidents by severity from cache:", error);
+    return [];
+  }
+};
+
+// PEOPLE INVOLVED
+// Function to set an array of incidents
+export const setPeopleInvolvedArray = async (people: PersonInvolved[]) => {
+  try {
+    // Validate each incident in the array before setting
+    people.forEach((person) => personInvolvedSchema.parse(person));
+
+    console.log("people set");
+
+    await db.people_involved.bulkPut(people);
+  } catch (error) {
+    console.error("Error setting incidents array in cache:", error);
+  }
+};
+
+export const getPeopleInvolvedByIncidentId = async (
+  incidentId: number
+): Promise<PersonInvolved[]> => {
+  try {
+    const peopleInvolved = await db.people_involved
+      .where("incident_id")
+      .equals(incidentId)
+      .toArray();
+    peopleInvolved.forEach((person) => personInvolvedSchema.parse(person));
+
+    console.log("settt");
+
+    return peopleInvolved;
+  } catch (error) {
+    console.error(
+      "Error getting people involved by incident ID from cache:",
+      error
+    );
     return [];
   }
 };

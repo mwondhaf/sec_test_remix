@@ -39,7 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const data = useLoaderData<typeof loader>();
   useEffect(() => {
     if (data && data?.error) {
-      toast.error("Wow so easy !", {
+      toast.error(data.error, {
         position: "top-right",
         hideProgressBar: false,
         closeOnClick: true,

@@ -41,6 +41,7 @@ import {
   Input,
   Select,
   SelectItem,
+  Textarea,
 } from "@nextui-org/react";
 import dayjs from "dayjs";
 import { Controller } from "react-hook-form";
@@ -370,7 +371,7 @@ const EditIncident = () => {
             control={control}
             rules={{ required: true }}
             render={({ field }) => (
-              <Input
+              <Textarea
                 label="Description"
                 {...field}
                 isRequired
@@ -386,7 +387,7 @@ const EditIncident = () => {
             control={control}
             rules={{ required: true }}
             render={({ field }) => (
-              <Input
+              <Textarea
                 label="Action"
                 {...field}
                 isRequired

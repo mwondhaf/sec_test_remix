@@ -46,6 +46,17 @@ export type Incident = {
   reporter_department?: Department;
   compiler?: Profile;
   editor?: Profile;
+  people_involved?: PersonInvolved[];
+};
+
+export type PersonInvolved = {
+  readonly id: number;
+  name: string;
+  id_number: string;
+  nationality: string;
+  incident_id: number;
+  person_department: Pick<Department, "name">;
+  remarks: string;
 };
 
 export type IncidentType = {

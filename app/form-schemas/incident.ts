@@ -4,6 +4,7 @@ import { incidentCategorySchema } from "./incident-category";
 import { departmentSchema } from "./department";
 import { createProfileSchema } from "./profile";
 import { entitySchema } from "./entity";
+import { personInvolvedSchema } from "./person-involved";
 
 enum Severity {
   Low = "Low",
@@ -32,4 +33,5 @@ export const createIncidentSchema = zod.object({
   editor: createProfileSchema.optional().nullable(),
   category: incidentCategorySchema.optional(),
   updated_at: zod.string().optional(),
+  // people_involved: personInvolvedSchema.optional(),
 });
