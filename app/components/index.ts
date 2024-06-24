@@ -6,6 +6,9 @@ import DetailTopBar from "./incidents/DetailTopBar";
 import FilterBar from "./incidents/FilterBar";
 import ListIncident from "./incidents/ListIncident";
 import PeopleInvolvedList from "./incidents/PeopleInvolvedList";
+import AddPersonProfile from "./settings/profile/AddPersonProfile";
+import ProfilesTable from "./settings/profile/ProfilesTable";
+
 export {
   Sidebar,
   CreateIncidentCategory,
@@ -15,4 +18,6 @@ export {
   ListIncident,
   DetailTopBar,
   PeopleInvolvedList,
+  ProfilesTable,
+  AddPersonProfile,
 };

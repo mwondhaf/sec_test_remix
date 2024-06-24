@@ -54,7 +54,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       }
 
       session.flash("success", "Added Person Successfully");
-      return redirect(`/incidents/${parsedData.incident_id}/people_involved`, {
+      return redirect(`/incidents/${parsedData.incident_id}`, {
         headers: {
           "Set-Cookie": await errSession.commitSession(session),
         },

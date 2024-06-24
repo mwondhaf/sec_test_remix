@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    ports: 
+      - "3000:3000"
+
+    environment:
+      - SUPABASE_URL=https://aqpmfxvvdfnfekueaufv.supabase.co
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxcG1meHZ2ZGZuZmVrdWVhdWZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTY0MTYyOTgsImV4cCI6MTk3MTk5MjI5OH0.Am2sJHGM9UXpGtz8B6uhDviSvv3dGA-M7V81wt9pLMM

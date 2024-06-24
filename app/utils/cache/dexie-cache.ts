@@ -2,6 +2,7 @@ import Dexie from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   Department,
+  Entity,
   Incident,
   IncidentCategory,
   IncidentType,
@@ -10,6 +11,7 @@ import {
 import {
   createIncidentSchema,
   departmentSchema,
+  entitySchema,
   incidentCategorySchema,
   personInvolvedSchema,
 } from "~/form-schemas";
@@ -22,6 +24,7 @@ class CacheDatabase extends Dexie {
   departments: Dexie.Table<Department, number>;
   incident_types: Dexie.Table<IncidentType, number>;
   people_involved: Dexie.Table<PersonInvolved, number>;
+  entities: Dexie.Table<Entity, number>;
 
   constructor() {
     super("CacheDatabase");
@@ -31,12 +34,14 @@ class CacheDatabase extends Dexie {
       departments: "id",
       incident_types: "id",
       people_involved: "incident_id",
+      entities: "id",
     });
     this.incidents = this.table("incidents");
     this.incident_categories = this.table("incident_categories");
     this.departments = this.table("departments");
     this.incident_types = this.table("incident_types");
     this.people_involved = this.table("people_involved");
+    this.entities = this.table("entities");
   }
 }
 
@@ -243,14 +248,39 @@ export const getPeopleInvolvedByIncidentId = async (
       .toArray();
     peopleInvolved.forEach((person) => personInvolvedSchema.parse(person));
 
-    console.log("settt");
-
     return peopleInvolved;
   } catch (error) {
     console.error(
       "Error getting people involved by incident ID from cache:",
       error
     );
+    return [];
+  }
+};
+
+// ENTITIES
+// Function to set an array of incidents
+export const setEntitiesArray = async (entities: Entity[]) => {
+  try {
+    // Validate each incident in the array before setting
+    entities.forEach((entity) => entitySchema.parse(entity));
+
+    await db.entities.bulkPut(entities);
+  } catch (error) {
+    console.error("Error setting entities array in cache:", error);
+  }
+};
+
+// get all categories
+export const getAllEntities = async (): Promise<Entity[]> => {
+  try {
+    const entities = await db.entities.toArray();
+
+    entities?.forEach((entity) => entitySchema.parse(entity));
+
+    return entities ? entities : [];
+  } catch (error) {
+    console.error("Error getting all entities from cache:", error);
     return [];
   }
 };

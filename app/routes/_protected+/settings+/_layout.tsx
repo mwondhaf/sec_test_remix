@@ -8,6 +8,7 @@ const _layout = () => {
         <Link to="/settings">Settings</Link>
         <Link to="/settings/incident-types">Incident Types</Link>
         <Link to="/settings/departments">Departments</Link>
+        <Link to="/settings/user-profiles">User Profiles</Link>
       </div>
       <div className="col-span-2 overflow-y-scroll h-screen border-l">
         <Outlet />

@@ -1,10 +1,5 @@
 import { Button } from "@nextui-org/react";
-import {
-  CheckIcon,
-  ChevronLeftIcon,
-  Pencil1Icon,
-  TrashIcon,
-} from "@radix-ui/react-icons";
+import { ChevronLeftIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import {
   Form,
   Link,

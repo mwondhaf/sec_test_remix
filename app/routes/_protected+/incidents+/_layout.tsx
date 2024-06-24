@@ -5,12 +5,16 @@ import {
   json,
   useLoaderData,
 } from "@remix-run/react";
-import { Incident } from "types";
+import { Department, Incident, IncidentCategory } from "types";
 import { DetailTopBar, FilterBar, ListIncident } from "~/components";
 import { createSupabaseServerClient } from "~/supabase.server";
 import {
+  getAllCategories,
+  getAllDepartments,
   getAllIncidents,
   getIncidentsBySeverity,
+  setCategoriesArray,
+  setDepartmentsArray,
   setIncidentsArray,
 } from "~/utils/cache/dexie-cache";
 
@@ -29,12 +33,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       .eq("severity", severity)
       .order("incident_time", { ascending: false });
 
-    if (error) {
-      return json({ incidents: [] as Incident[], error: error.message });
+    const { data: departments, error: deptError } = await supabaseClient
+      .from("departments")
+      .select("*");
+
+    const { data: categories, error: catError } = await supabaseClient
+      .from("incident_categories")
+      .select("*");
+
+    if (error || deptError || catError) {
+      return json({ incidents: [] as Incident[], error: error?.message });
     }
 
     return json({
       incidents: (incidents as unknown as Incident[]) ?? ([] as Incident[]),
+      departments: departments ?? ([] as Department[]),
+      categories: categories ?? ([] as IncidentCategory[]),
     });
   }
 
@@ -45,12 +59,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     )
     .order("incident_time", { ascending: false });
 
-  if (error) {
-    return json({ incidents: [] as Incident[], error: error.message });
+  const { data: departments, error: deptError } = await supabaseClient
+    .from("departments")
+    .select("*");
+
+  const { data: categories, error: catError } = await supabaseClient
+    .from("incident_categories")
+    .select("*");
+
+  if (error || deptError || catError) {
+    return json({ incidents: [] as Incident[], error: error?.message });
   }
 
   return json({
     incidents: (incidents as unknown as Incident[]) ?? ([] as Incident[]),
+    departments: departments ?? ([] as Department[]),
+    categories: categories ?? ([] as IncidentCategory[]),
   });
 };
 
@@ -76,16 +100,29 @@ export async function clientLoader({
     return json({ incidents });
   }
 
-  const cachedIncidents = await getAllIncidents();
+  const [cachedIncidents, cachedDepts, cachedCats] = await Promise.all([
+    getAllIncidents(),
+    getAllDepartments(),
+    getAllCategories(),
+  ]);
 
-  if (cachedIncidents.length > 0) return json({ incidents: cachedIncidents });
+  if (
+    cachedIncidents.length > 0 &&
+    cachedDepts.length > 0 &&
+    cachedCats.length > 0
+  )
+    return json({ incidents: cachedIncidents, departments: cachedDepts });
 
   // @ts-ignore
-  let { incidents } = await serverLoader();
+  let { incidents, departments, categories } = await serverLoader();
 
-  await setIncidentsArray(incidents);
+  await Promise.all([
+    setIncidentsArray(incidents),
+    setDepartmentsArray(departments),
+    setCategoriesArray(categories),
+  ]);
 
-  return json({ incidents });
+  return json({ incidents, departments, categories });
 }
 
 clientLoader.hydrate = true;

@@ -22,6 +22,7 @@ export type Profile = {
   entityId: number;
   entities: Entity;
   employeeType: "INHOUSE" | "OTHER" | "CONTRACTOR";
+  company?: Pick<Company, "name">;
 };
 
 enum Severity {

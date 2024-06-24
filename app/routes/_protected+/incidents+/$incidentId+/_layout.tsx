@@ -99,7 +99,11 @@ const DetailedIncident: React.FC<DetailedIncidentProps> = (props) => {
   const updated_at = dayjs(incident?.updated_at).format("DD-MM-YYYY HH:mm");
 
   if (editPage) {
-    return <Outlet />;
+    return (
+      <div className="h-[92dvh] overflow-y-scroll">
+        <Outlet />
+      </div>
+    );
   }
 
   return (
@@ -148,13 +152,13 @@ const DetailedIncident: React.FC<DetailedIncidentProps> = (props) => {
             <AddPeopleInvolvedModal />
           </div>
         </div>
-      </div>
-      <div className="text-tiny text-cyan-500">
-        <p className="">Compiled by: {incident?.compiler?.name}</p>
-        {incident?.compiler?.name !== incident?.compiler?.name && (
-          <p className="">Edited by: {incident?.editor?.name}</p>
-        )}
-        <p className="">Last changed: {updated_at}</p>
+        <div className="text-tiny text-cyan-500">
+          <p className="">Compiled by: {incident?.compiler?.name}</p>
+          {incident?.compiler?.name !== incident?.compiler?.name && (
+            <p className="">Edited by: {incident?.editor?.name}</p>
+          )}
+          <p className="">Last changed: {updated_at}</p>
+        </div>
       </div>
     </div>
   );

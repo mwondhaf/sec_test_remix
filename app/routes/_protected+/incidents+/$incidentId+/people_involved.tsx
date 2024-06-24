@@ -18,8 +18,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     )
     .eq("incident_id", incidentId);
 
-  console.log({ people_involved });
-
   if (peopleError) {
     return { error: peopleError, people_involved: null };
   }

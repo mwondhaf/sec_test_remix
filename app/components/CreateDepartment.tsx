@@ -8,7 +8,7 @@ import {
   useDisclosure,
   Input,
 } from "@nextui-org/react";
-import { Form, useFetcher } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 
 export default function CreateDepartment() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();

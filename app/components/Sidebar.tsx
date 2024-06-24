@@ -1,10 +1,4 @@
 import {
-  ZonedDateTime,
-  getLocalTimeZone,
-  now,
-  toCalendarDateTime,
-} from "@internationalized/date";
-import {
   Button,
   Dropdown,
   DropdownItem,
@@ -14,13 +8,12 @@ import {
 } from "@nextui-org/react";
 import {
   DotsVerticalIcon,
-  ExitIcon,
   FileIcon,
   HomeIcon,
   PlusIcon,
 } from "@radix-ui/react-icons";
 import { Form, Link } from "@remix-run/react";
-import dayjs from "dayjs";
+import { CogIcon } from "lucide-react";
 import React from "react";
 import { Profile } from "types";
 
@@ -50,6 +43,17 @@ const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
             startContent={<FileIcon />}
           >
             Incidents
+          </Button>
+          <Button
+            className="flex justify-start"
+            as={Link}
+            to="/settings"
+            variant="light"
+            size="lg"
+            radius="full"
+            startContent={<CogIcon />}
+          >
+            Settings
           </Button>
           <Button
             size="lg"
@@ -83,13 +87,13 @@ const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
                 <DropdownItem key="new">
                   <Link to="/settings">Incident Settings</Link>
                 </DropdownItem>
-                <DropdownItem key="delete" color="default">
+                <DropdownItem key="out" color="default">
                   <Form action="/sign-out" method="post">
                     <Button
-                      className="w-full"
+                      className="w-full flex justify-start p-0"
                       type="submit"
                       variant="light"
-                      size="sm"
+                      // size="sm"
                     >
                       Logout
                     </Button>
