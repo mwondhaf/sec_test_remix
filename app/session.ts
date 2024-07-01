@@ -15,7 +15,7 @@ export const profileSession = createCookieSessionStorage<SessionData>({
     path: "/",
     sameSite: "lax",
     secrets: ["s3cret1"], //TODO Change this
-    secure: true,
+    secure: false,
   },
 });
 

@@ -27,7 +27,7 @@ SessionFlashData>({
     //   path: "/",
     sameSite: "lax",
     secrets: ["s3cret1"], //Todo to be changed
-    secure: true,
+    secure: false,
   },
 });
 
