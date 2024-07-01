@@ -19,7 +19,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 
     // Send a request to Gotenberg to convert the URL to PDF
     const response = await fetch(
-      "http://localhost:3001/forms/chromium/convert/url",
+      "http://0.0.0.0:3001/forms/chromium/convert/url",
       {
         method: "POST",
         body: form,
