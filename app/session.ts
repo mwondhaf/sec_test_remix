@@ -3,8 +3,8 @@ import { Session, createCookieSessionStorage } from "@remix-run/node"; // or clo
 import { Profile } from "types";
 
 type SessionData = {
-  profiles: Profile[];
-  active_profile: Profile;
+  profiles: Profile[] | undefined;
+  active_profile: Profile | undefined;
 };
 
 export const profileSession = createCookieSessionStorage<SessionData>({

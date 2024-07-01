@@ -2,9 +2,8 @@ import { CalendarDateTime } from "@internationalized/date";
 import * as zod from "zod";
 import { incidentCategorySchema } from "./incident-category";
 import { departmentSchema } from "./department";
-import { createProfileSchema } from "./profile";
+import { profileSchema } from "./profile";
 import { entitySchema } from "./entity";
-import { personInvolvedSchema } from "./person-involved";
 
 enum Severity {
   Low = "Low",
@@ -29,9 +28,10 @@ export const createIncidentSchema = zod.object({
   incident_location: zod.string().min(1),
   reporter_department: departmentSchema.optional(),
   entity: entitySchema.optional(),
-  compiler: createProfileSchema.optional(),
-  editor: createProfileSchema.optional().nullable(),
+  compiler: profileSchema.optional(),
+  editor: profileSchema.optional().nullable(),
   category: incidentCategorySchema.optional(),
   updated_at: zod.string().optional(),
+  is_resolved: zod.string().optional().or(zod.boolean().optional()),
   // people_involved: personInvolvedSchema.optional(),
 });

@@ -4,11 +4,11 @@ import { entitySchema } from "./entity";
 import { createIncidentSchema } from "./incident";
 import { incidentCategorySchema } from "./incident-category";
 import { personInvolvedSchema } from "./person-involved";
-import { createProfileSchema } from "./profile";
+import { profileSchema } from "./profile";
 
 export {
   signInSchema,
-  createProfileSchema,
+  profileSchema,
   createIncidentSchema,
   incidentCategorySchema,
   departmentSchema,

@@ -22,7 +22,7 @@ export default function CreateIncidentCategory({
 
   return (
     <>
-      <Button color="primary" onPress={onOpen}>
+      <Button color="default" variant="flat" onPress={onOpen}>
         New Category
       </Button>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -48,15 +48,15 @@ export default function CreateIncidentCategory({
                     </SelectItem>
                   )}
                 </Select>
-                <Input name="name" />
+                <Input name="name" label="Category Name" />
                 <input type="hidden" name="action" value="create" />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                  Close
+                  Cancel
                 </Button>
                 <Button color="primary" type="submit" onPress={onClose}>
-                  Action
+                  Create
                 </Button>
               </ModalFooter>
               <input type="hidden" name="_action" value={"create_type"} />

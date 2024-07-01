@@ -65,9 +65,16 @@ const IncidentTypes = () => {
   const { data, error } = useLoaderData<typeof loader>();
 
   return (
-    <div>
-      IncidentTypes
-      <CreateIncidentType />
+    <div className="px-4">
+      <div className="flex items-center justify-between h-[8dvh] my-2">
+        <div>
+          <h3 className="text-2xl font-bold text-gray-700">Incident Types</h3>
+        </div>
+        <div className="flex gap-4 items-center">
+          <CreateIncidentCategory {...{ incident_types: data }} />
+          <CreateIncidentType />
+        </div>
+      </div>
       <div className="">
         {data.map((t) => (
           <div key={t.id}>
@@ -106,7 +113,6 @@ const IncidentTypes = () => {
                   ))}
                 </div>
                 <div className="flex justify-between">
-                  <CreateIncidentCategory {...{ incident_types: data }} />
                   <Form
                     method="DELETE"
                     action="/settings/incident-types/incident-type"

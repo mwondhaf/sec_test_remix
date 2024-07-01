@@ -66,8 +66,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         .delete()
         .eq("id", person_id);
       if (deleteError) {
-        console.log({ deleteError });
-
         session.flash("error", "Failed to Delete Person");
         return redirect(`/incidents/${data.incident_id}/people_involved`, {
           headers: {

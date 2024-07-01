@@ -16,7 +16,9 @@ export default function CreateDepartment() {
   const fetcher = useFetcher();
   return (
     <>
-      <Button onPress={onOpen}>New Department</Button>
+      <Button onPress={onOpen} variant="flat" color="primary">
+        New Department
+      </Button>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (

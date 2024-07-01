@@ -3,16 +3,18 @@ import { ChevronLeftIcon, Pencil1Icon } from "@radix-ui/react-icons";
 import {
   Form,
   Link,
+  useLocation,
   useMatches,
   useNavigate,
   useParams,
 } from "@remix-run/react";
-import { MailPlus, Printer, Trash2Icon } from "lucide-react";
+import { File, MailPlus, Printer, Trash2Icon } from "lucide-react";
 
 const DetailTopBar = () => {
   const { incidentId } = useParams();
   const matches = useMatches();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const editPage = matches.some(
     (match) => match.pathname === `/incidents/${incidentId}/edit-incident`
@@ -53,6 +55,16 @@ const DetailTopBar = () => {
               <MailPlus size={18} />
             </Button>
             <Button type="submit" isIconOnly radius="full" variant="light">
+              <File size={18} />
+            </Button>
+            <Button
+              as={Link}
+              to={`/templates/single_incident?url=https://example.com/`}
+              target="_blank"
+              isIconOnly
+              radius="full"
+              variant="light"
+            >
               <Printer size={18} />
             </Button>
             <Form method="delete" action="/incidents/delete_incident">

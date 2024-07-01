@@ -10,9 +10,21 @@ import {
   Select,
   SelectItem,
 } from "@nextui-org/react";
-import { Form, useMatches, useParams } from "@remix-run/react";
-import { countries } from "~/utils/countries-json";
-import { Company, Department, Entity } from "types";
+import { Form } from "@remix-run/react";
+import { Company, Entity } from "types";
+
+enum EmployeeType {
+  INHOUSE = "INHOUSE",
+  CONTRACTOR = "CONTRACTOR",
+  OTHER = "OTHER",
+}
+
+enum Role {
+  BASIC = "BASIC",
+  ADMIN = "ADMIN",
+  MANAGER = "MANAGER",
+  SUPERVISOR = "SUPERVISOR",
+}
 
 export default function AddPersonProfile({
   entities,
@@ -22,68 +34,98 @@ export default function AddPersonProfile({
   companies: Company[];
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const matches = useMatches();
-
-  // const foundData: any = matches.find(
-  //   (match) => match.pathname === `/incidents/${incidentId}`
-  // );
-
   return (
     <>
       <div className="flex flex-wrap gap-3">
-        <Button onPress={onOpen}>Add Person Involved</Button>
+        <Button variant="flat" color="primary" onPress={onOpen}>
+          Add User Profile
+        </Button>
       </div>
       <Modal
         isDismissable={false}
-        size={"md"}
+        size={"4xl"}
         isOpen={isOpen}
         onClose={onClose}
       >
         <ModalContent>
           {(onClose) => (
             <Form
-              // action={`/incidents/${incidentId}/add_person_involved`}
+              action={`/settings/user-profiles/profile_action`}
               method="post"
             >
               <ModalHeader className="flex flex-col gap-1">
-                Person Involved
+                Add User Profile
               </ModalHeader>
               <ModalBody>
-                <input type="hidden" name="intent" value={"add_person"} />
-                {/* <input type="hidden" name="incident_id" value={incidentId} /> */}
-                <Input name="name" label="Name" size="sm" isRequired />
-
-                <Input name="id_number" label="ID Number" size="sm" />
-                <Select
-                  name="nationality"
-                  items={companies}
-                  label="Company"
-                  placeholder="Select a company"
-                >
-                  {(company) => (
-                    <SelectItem key={company.id}>{company.name}</SelectItem>
-                  )}
-                </Select>
-                <Select
-                  items={entities}
-                  label="Entities"
-                  placeholder="Select an entity"
-                  name="person_dept"
-                  isRequired
-                >
-                  {(entity) => (
-                    <SelectItem key={entity.id}>{entity.name}</SelectItem>
-                  )}
-                </Select>
-
-                <Input name="remarks" label="Remarks" size="sm" />
+                <div className="grid grid-cols-2 gap-5">
+                  <input type="hidden" name="intent" value={"add_person"} />
+                  <Input name="name" label="Name" size="md" isRequired />
+                  <Input
+                    name="email"
+                    type="email"
+                    label="Email"
+                    size="md"
+                    isRequired
+                  />
+                  <Select
+                    name="companyId"
+                    items={companies}
+                    label="Company"
+                    placeholder="Select a company"
+                  >
+                    {(company) => (
+                      <SelectItem key={company.id}>{company.name}</SelectItem>
+                    )}
+                  </Select>
+                  <Input name="idNumber" label="ID Number" size="md" />
+                  <Select
+                    name="employeeType"
+                    size="md"
+                    label="Employee Type"
+                    placeholder="Choose"
+                    isRequired
+                  >
+                    {Object.values(EmployeeType).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                  <Select
+                    items={entities}
+                    label="Entities"
+                    placeholder="Select an entity"
+                    name="entityId"
+                    isRequired
+                  >
+                    {(entity) => (
+                      <SelectItem key={entity.id}>{entity.name}</SelectItem>
+                    )}
+                  </Select>
+                  <Select
+                    name="role"
+                    size="md"
+                    label="Role"
+                    placeholder="Choose"
+                    isRequired
+                    // isInvalid={!!errors.severity?.message}
+                    // errorMessage={errors?.severity?.message?.toString()}
+                    // defaultSelectedKeys={[incident.severity]}
+                  >
+                    {Object.values(Role).map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
                   Cancel
                 </Button>
                 <Button type="submit" color="primary" onPress={onClose}>
-                  Add
+                  Add Profile
                 </Button>
               </ModalFooter>
             </Form>

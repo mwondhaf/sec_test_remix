@@ -1,4 +1,4 @@
-import { Button, Divider, Link } from "@nextui-org/react";
+import { Link } from "@nextui-org/react";
 import { LoaderFunctionArgs, json } from "@remix-run/node";
 import {
   ClientLoaderFunctionArgs,
@@ -15,6 +15,7 @@ import { createSupabaseServerClient } from "~/supabase.server";
 import {
   getAllDepartments,
   getIncidentById,
+  setDepartmentsArray,
   setIncident,
 } from "~/utils/cache/dexie-cache";
 
@@ -27,7 +28,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 
   const { data: incident, error } = await supabaseClient
     .from("incidents")
-    .select("*")
+    .select("*, category:incident_categories!incidents_category_id_fkey(name)")
     .eq("id", incidentId)
     .single();
 
@@ -36,14 +37,14 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     .select("*");
 
   if (error || deptError) {
-    return json({ error, incident: null, departments: null });
+    return { error, incident: null, departments: null };
   }
 
-  return json({
+  return {
     incident,
     departments,
     error: null,
-  });
+  };
 };
 
 export const shouldRevalidate = async () => {
@@ -57,8 +58,10 @@ export async function clientLoader({
   const { incidentId } = params;
   if (!incidentId) return { incident: null };
 
-  let cachedIncident = await getIncidentById(Number(incidentId));
-  let cachedDepts = await getAllDepartments();
+  const [cachedIncident, cachedDepts] = await Promise.all([
+    getIncidentById(Number(incidentId)),
+    getAllDepartments(),
+  ]);
 
   if (cachedIncident && cachedDepts.length > 0) {
     return {
@@ -69,8 +72,7 @@ export async function clientLoader({
 
   // @ts-ignore
   const { incident, departments } = await serverLoader();
-
-  await setIncident(incident);
+  await Promise.all([setIncident(incident), setDepartmentsArray(departments)]);
 
   return { incident, departments };
 }
@@ -108,7 +110,7 @@ const DetailedIncident: React.FC<DetailedIncidentProps> = (props) => {
 
   return (
     <div className="h-[92dvh]">
-      <div className="py-2 sticky border-b h-[8dvh]">
+      <div className="pb-2 sticky border-b h-[8dvh] ">
         <div className="flex items-center justify-between">
           <div className="">
             <h3 className="text-2xl font-bold text-gray-700">
@@ -130,7 +132,7 @@ const DetailedIncident: React.FC<DetailedIncidentProps> = (props) => {
           </div>
         </div>
       </div>
-      <div className="space-y-4 py-4 h-[84dvh] overflow-y-scroll">
+      <div className="space-y-4 py-4 h-[84dvh] overflow-y-auto">
         <div className="">
           <h1 className="text-md font-bold text-gray-600">Occurrence</h1>
           <p className="text-gray-500 text-sm">{incident?.description}</p>

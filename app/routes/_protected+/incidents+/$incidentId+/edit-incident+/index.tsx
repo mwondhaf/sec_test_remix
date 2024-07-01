@@ -1,19 +1,12 @@
-import {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  json,
-  redirect,
-} from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import {
   ClientActionFunctionArgs,
   ClientLoaderFunctionArgs,
   Form,
-  useFetcher,
   useLoaderData,
   useNavigate,
   useSearchParams,
 } from "@remix-run/react";
-import React from "react";
 import { Department, Incident, IncidentCategory } from "types";
 import { createSupabaseServerClient } from "~/supabase.server";
 import {
@@ -142,6 +135,11 @@ enum Severity {
   High = "High",
 }
 
+enum Status {
+  Resolved = "Resolved",
+  Pending = "Pending",
+}
+
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { supabaseClient } = createSupabaseServerClient(request);
   const { active_profile } = await profileSessionData(request);
@@ -161,12 +159,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const { id, ...rest } = formData;
 
+  console.info({ formData });
+
   const newData = {
     ...rest,
     ...(inc_time && { incident_time: inc_time }),
     ...(close_time && { incident_close_time: close_time }),
     editor_id: active_profile?.id,
     updated_at: new Date().toISOString(),
+    is_resolved: formData.is_resolved === "Resolved" ? true : false,
   };
 
   const { error, data } = await supabaseClient
@@ -410,6 +411,34 @@ const EditIncident = () => {
                   isInvalid={!!errors.action?.message}
                   errorMessage={errors?.action?.message?.toString()}
                 />
+              )}
+            />
+          </div>
+          <div className="">
+            <Controller
+              name="is_resolved"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                // @ts-expect-error
+                <Select
+                  {...field}
+                  size="md"
+                  label="Status"
+                  placeholder="Choose"
+                  isRequired
+                  defaultSelectedKeys={[
+                    incident.is_resolved === true
+                      ? Status.Resolved
+                      : Status.Pending,
+                  ]}
+                >
+                  {Object.values(Status).map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </Select>
               )}
             />
           </div>

@@ -7,6 +7,7 @@ import {
 } from "@remix-run/react";
 import { Department, Incident, IncidentCategory } from "types";
 import { DetailTopBar, FilterBar, ListIncident } from "~/components";
+import { profileSessionData } from "~/session";
 import { createSupabaseServerClient } from "~/supabase.server";
 import {
   getAllCategories,
@@ -20,6 +21,7 @@ import {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { supabaseClient } = createSupabaseServerClient(request);
+  const { active_profile } = await profileSessionData(request);
 
   const url = new URL(request.url);
   const severity = url.searchParams.get("severity");
@@ -31,24 +33,30 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         "*, reporter_department:departments!incidents_reporter_dept_fkey(*), entity:entities!incidents_entity_id_fkey(*), compiler: profiles!incidents_compiler_id_fkey(*), editor: profiles!incidents_editor_id_fkey(*),category:incident_categories!incidents_category_id_fkey(*)"
       )
       .eq("severity", severity)
+      .eq("entity_id", active_profile?.entityId)
       .order("incident_time", { ascending: false });
 
-    const { data: departments, error: deptError } = await supabaseClient
-      .from("departments")
-      .select("*");
+    // const { data: departments, error: deptError } = await supabaseClient
+    //   .from("departments")
+    //   .select("*");
 
     const { data: categories, error: catError } = await supabaseClient
       .from("incident_categories")
       .select("*");
 
-    if (error || deptError || catError) {
-      return json({ incidents: [] as Incident[], error: error?.message });
+    if (error) {
+      return json({
+        incidents: [] as Incident[],
+        // departments: [],
+        categories: null,
+        error: error?.message,
+      });
     }
 
     return json({
       incidents: (incidents as unknown as Incident[]) ?? ([] as Incident[]),
-      departments: departments ?? ([] as Department[]),
-      categories: categories ?? ([] as IncidentCategory[]),
+      // departments: departments ?? ([] as Department[]),
+      categories: categories,
     });
   }
 
@@ -57,24 +65,30 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     .select(
       "*, reporter_department:departments!incidents_reporter_dept_fkey(*), entity:entities!incidents_entity_id_fkey(*), compiler: profiles!incidents_compiler_id_fkey(*), editor: profiles!incidents_editor_id_fkey(*),category:incident_categories!incidents_category_id_fkey(*)"
     )
+    .eq("entity_id", active_profile?.entityId)
     .order("incident_time", { ascending: false });
 
-  const { data: departments, error: deptError } = await supabaseClient
-    .from("departments")
-    .select("*");
+  // const { data: departments, error: deptError } = await supabaseClient
+  //   .from("departments")
+  //   .select("*");
 
   const { data: categories, error: catError } = await supabaseClient
     .from("incident_categories")
     .select("*");
 
-  if (error || deptError || catError) {
-    return json({ incidents: [] as Incident[], error: error?.message });
+  if (error || catError) {
+    return json({
+      incidents: null,
+      // departments: [],
+      categories: null,
+      error: error?.message,
+    });
   }
 
   return json({
     incidents: (incidents as unknown as Incident[]) ?? ([] as Incident[]),
-    departments: departments ?? ([] as Department[]),
-    categories: categories ?? ([] as IncidentCategory[]),
+    // departments: departments ?? ([] as Department[]),
+    categories: categories,
   });
 };
 
@@ -100,29 +114,33 @@ export async function clientLoader({
     return json({ incidents });
   }
 
-  const [cachedIncidents, cachedDepts, cachedCats] = await Promise.all([
+  const [cachedIncidents, cachedCats] = await Promise.all([
     getAllIncidents(),
-    getAllDepartments(),
+    // getAllDepartments(),
     getAllCategories(),
   ]);
 
   if (
     cachedIncidents.length > 0 &&
-    cachedDepts.length > 0 &&
+    // cachedDepts.length > 0 &&
     cachedCats.length > 0
   )
-    return json({ incidents: cachedIncidents, departments: cachedDepts });
+    return json({
+      incidents: cachedIncidents,
+      // departments: cachedDepts,
+      // categories: cachedCats,
+    });
 
   // @ts-ignore
-  let { incidents, departments, categories } = await serverLoader();
+  let { incidents, categories } = await serverLoader();
 
   await Promise.all([
     setIncidentsArray(incidents),
-    setDepartmentsArray(departments),
+    // setDepartmentsArray(departments),
     setCategoriesArray(categories),
   ]);
 
-  return json({ incidents, departments, categories });
+  return { incidents, categories };
 }
 
 clientLoader.hydrate = true;
@@ -140,8 +158,8 @@ const Layout = () => {
           <DetailTopBar />
         </div>
       </div>
-      <div className="grid grid-cols-6 h-[92dvh]">
-        <div className="h-full overflow-y-scroll col-span-2">
+      <div className="grid grid-cols-6 h-[92dvh] ">
+        <div className="h-full overflow-y-auto col-span-2">
           {incidents.map((incident) => (
             <ListIncident {...{ incident }} key={incident.id} />
           ))}

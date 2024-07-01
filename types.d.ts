@@ -20,9 +20,13 @@ export type Profile = {
   role: "BASIC" | "ADMIN";
   idNumber: string;
   entityId: number;
-  entities: Entity;
+  entity: Entity;
+  entities?: Pick<Entity, "name", "id">;
   employeeType: "INHOUSE" | "OTHER" | "CONTRACTOR";
   company?: Pick<Company, "name">;
+  shift_start?: string;
+  shift_end?: string;
+  companyId?: string;
 };
 
 enum Severity {
@@ -43,11 +47,13 @@ export type Incident = {
   reporter_name: string;
   action: string;
   updated_at: string;
-  category?: IncidentCategory;
+  category?: Pick<IncidentCategory, "name">;
   reporter_department?: Department;
   compiler?: Profile;
   editor?: Profile;
   people_involved?: PersonInvolved[];
+  is_resolved: boolean;
+  incident_type_id: Pick<IncidentCategory, "incident_type_id">;
 };
 
 export type PersonInvolved = {

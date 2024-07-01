@@ -30,7 +30,6 @@ import {
   ClientLoaderFunctionArgs,
   Form,
   useLoaderData,
-  useParams,
   useSearchParams,
 } from "@remix-run/react";
 import dayjs from "dayjs";
@@ -112,7 +111,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     .from("incidents")
     .insert({
       ...formData,
-      entity_id: active_profile?.entities.id,
+      entity_id: active_profile?.entities!.id,
       compiler_id: active_profile?.id,
       incident_close_time: close_time,
       incident_time: inc_time,
@@ -121,6 +120,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     .single();
 
   if (error) {
+    console.log(error.message);
+
     return json({ error });
   }
 

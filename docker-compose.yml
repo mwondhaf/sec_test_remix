@@ -7,3 +7,21 @@ services:
     environment:
       - SUPABASE_URL=https://aqpmfxvvdfnfekueaufv.supabase.co
       - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxcG1meHZ2ZGZuZmVrdWVhdWZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTY0MTYyOTgsImV4cCI6MTk3MTk5MjI5OH0.Am2sJHGM9UXpGtz8B6uhDviSvv3dGA-M7V81wt9pLMM
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports:
+      - "3001:3000"
+    
+
+  libretranslate:
+    container_name: libretranslate
+    image: libretranslate/libretranslate:latest
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    healthcheck:
+      test: ["CMD-SHELL", "./venv/bin/python scripts/healthcheck.py"]
+    tty: true
+    environment:
+      LT_LOAD_ONLY: en,ar

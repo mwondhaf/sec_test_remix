@@ -98,6 +98,7 @@ export const setIncidentsArray = async (incidents: Incident[]) => {
   try {
     // Validate each incident in the array before setting
     incidents.forEach((incident) => createIncidentSchema.parse(incident));
+    console.log("settings incidents");
 
     await db.incidents.bulkPut(incidents);
   } catch (error) {
@@ -145,6 +146,8 @@ export const getAllCategories = async (): Promise<IncidentCategory[]> => {
     );
     return allCategories ? allCategories : [];
   } catch (error) {
+    console.log(error);
+
     console.error("Error getting all categories from cache:", error);
     return [];
   }
@@ -167,9 +170,13 @@ export const setDepartmentsArray = async (departments: Department[]) => {
 // get all departments
 export const getAllDepartments = async (): Promise<Department[]> => {
   try {
-    return await db.departments.toArray();
+    // const departments = useLiveQuery(async () => {
+    const departments = await db.departments.toArray();
+    // });
+
+    return departments ? departments : [];
   } catch (error) {
-    console.error("Error getting all categories from cache:", error);
+    console.error("Error getting all departments from cache:", error);
     return [];
   }
 };

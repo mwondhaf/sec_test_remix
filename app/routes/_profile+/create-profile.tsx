@@ -1,27 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import {
-  Form,
-  redirect,
-  useActionData,
-  useLoaderData,
-  useMatches,
-  useParams,
-} from "@remix-run/react";
-import React from "react";
+import { Form, redirect, useActionData, useLoaderData } from "@remix-run/react";
 import { Controller } from "react-hook-form";
 import { getValidatedFormData, useRemixForm } from "remix-hook-form";
 import { Company, Entity } from "types";
 import * as zod from "zod";
-import { createProfileSchema } from "~/form-schemas";
+import { profileSchema } from "~/form-schemas";
 import { createSupabaseServerClient } from "~/supabase.server";
 
-type FormData = zod.infer<typeof createProfileSchema>;
-const resolver = zodResolver(createProfileSchema);
+type FormData = zod.infer<typeof profileSchema>;
+const resolver = zodResolver(profileSchema);
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { supabaseClient, headers } = createSupabaseServerClient(request);
+  console.log("actioning");
 
   const {
     errors,
@@ -38,6 +31,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   });
 
   if (error) {
+    console.log(error.message);
+
     return json({ success: false, error: error?.message }, { headers });
   }
 
@@ -93,12 +88,15 @@ const CreateProfile = () => {
       email: email ?? "",
     },
   });
+
   return (
-    <div>
-      <h1>Create Profile</h1>
+    <div className="max-w-md h-screen justify-center flex flex-col mx-auto">
+      <h1 className="text-center pb-10 text-2xl font-bold">
+        Create Your Profile
+      </h1>
       {!error ? (
         <>
-          <div className="flex flex-col px-32 justify-center">
+          <div className="flex flex-col justify-center">
             <>{actionData && <p>{actionData?.error}</p>}</>
 
             <Form

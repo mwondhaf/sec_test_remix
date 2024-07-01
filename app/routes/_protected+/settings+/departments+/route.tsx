@@ -8,6 +8,7 @@ import {
 } from "@remix-run/react";
 import { Department } from "types";
 import { CreateDepartment } from "~/components";
+import { errSession } from "~/flash.session";
 import { createSupabaseServerClient } from "~/supabase.server";
 import { getAllDepartments } from "~/utils/cache/dexie-cache";
 
@@ -40,6 +41,8 @@ export const clientLoader = async ({
 
 export const action = async ({ request }: LoaderFunctionArgs) => {
   const { supabaseClient } = createSupabaseServerClient(request);
+  const session = await errSession.getSession(request.headers.get("Cookie"));
+
   const formData = await request.formData();
   const name = String(formData.get("name"));
   const intent = String(formData.get("intent"));
@@ -47,8 +50,29 @@ export const action = async ({ request }: LoaderFunctionArgs) => {
   switch (intent) {
     case "delete_dept":
       const dept_id = String(formData.get("dept_id"));
-      await supabaseClient.from("departments").delete().eq("id", dept_id);
-      break;
+      const { error: deptError } = await supabaseClient
+        .from("departments")
+        .delete()
+        .eq("id", dept_id);
+      if (deptError) {
+        session.flash("error", deptError.message);
+
+        return json(
+          { error: deptError },
+          {
+            headers: {
+              "Set-Cookie": await errSession.commitSession(session),
+            },
+          }
+        );
+      }
+
+      session.flash("success", "Deleted successfully");
+      return json({
+        headers: {
+          "Set-Cookie": await errSession.commitSession(session),
+        },
+      });
 
     default:
       const { error } = await supabaseClient
@@ -73,9 +97,13 @@ const Departments = () => {
   }>();
 
   return (
-    <div>
-      <div className="">Departments</div>
-      <CreateDepartment />
+    <div className="px-4">
+      <div className="flex items-center justify-between h-[8dvh] my-2">
+        <div>
+          <h3 className="text-2xl font-bold text-gray-700">Departments</h3>
+        </div>
+        <CreateDepartment />
+      </div>
       {data?.map((d) => (
         <div key={d.id} className="flex items-center justify-between my-4">
           <h2>{d.name}</h2>

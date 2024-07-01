@@ -71,7 +71,7 @@ const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
       <div className="">
         <div className="flex flex-col">
           <div className="flex items-center justify-between">
-            <User name={profile.name} description={profile.entities.name} />
+            <User name={profile.name} description={profile?.entities?.name} />
             <Dropdown>
               <DropdownTrigger>
                 <Button

@@ -72,16 +72,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <NextUIProvider>
-          {/* {navigation.state === "loading" && ( */}
           <Progress
             size="sm"
             isIndeterminate={navigation.state !== "loading" ? false : true}
             aria-label="Loading..."
             className="max-w-full"
           />
-          {/* )} */}
-          {children}
-          <ToastContainer />
+          <div className="max-w-7xl mx-auto md:max-w-full ">
+            {children}
+            <ToastContainer />
+          </div>
           <ScrollRestoration />
           <Scripts />
         </NextUIProvider>
