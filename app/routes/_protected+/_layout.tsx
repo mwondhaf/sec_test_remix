@@ -7,7 +7,7 @@ import { FileWarning } from "lucide-react";
 import { Profile } from "types";
 import { Sidebar } from "~/components";
 import { errSession } from "~/flash.session";
-import { profileSession, profileSessionData } from "~/session";
+import { profileSession, profileSessionData } from "~/sessions/session.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import {
   isCurrentTimeWithinShift,
@@ -65,7 +65,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       // Invalidate active_profile and redirect to sign-out
       session.set("active_profile", undefined);
       const message = "Your shift has ended";
-      console.log(message);
       return json({
         active_profile,
         shift_ended: true,
@@ -123,11 +122,11 @@ const _layout = () => {
   }
 
   return (
-    <div className="grid grid-cols-5 max-h-screen min-h-screen overscroll-none scrollbar-hide">
+    <div className="grid grid-cols-5 max-h-screen min-h-screen overflow-y-hidden">
       <div className="col-span-1">
         <Sidebar {...{ profile: active_profile }} />
       </div>
-      <div className="col-span-4 border-l">
+      <div className="col-span-4 border-l rtl:border-r">
         <Outlet />
       </div>
     </div>

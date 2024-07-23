@@ -31,21 +31,24 @@ const ListIncident: React.FC<ListIncidentProps> = ({ incident }) => {
           radius="none"
           shadow="none"
           className={clsx(
+            "bg-transparent",
             incident.severity === ("Medium" as any) && "bg-orange-50",
             incident.severity === ("High" as any) && "bg-red-50",
-            currentlySelected && "bg-sky-100"
+            currentlySelected && "bg-sky-50"
           )}
         >
           <CardBody>
-            <div className="flex items-center justify-between">
-              <p className="text-sm line-clamp-1 font-medium text-gray-600">
-                {incident?.category?.name}
+            <div className="">
+              <div className="flex items-center justify-between">
+                <p className="text-sm line-clamp-1 font-medium text-gray-600">
+                  {incident?.category?.name}
+                </p>
+                <p className="text-tiny text-gray-400">{incident_time}</p>
+              </div>
+              <p className="text-xs line-clamp-2 text-gray-400">
+                {incident.description}
               </p>
-              <p className="text-tiny text-gray-400">{incident_time}</p>
             </div>
-            <p className="text-xs line-clamp-2 text-gray-400">
-              {incident.description}
-            </p>
           </CardBody>
         </Card>
       </Link>

@@ -4,23 +4,39 @@ import React from "react";
 
 const _layout = () => {
   return (
-    <div className="grid grid-cols-3">
-      <div className="flex flex-col">
-        <div className="p-6">
-          <h3 className="text-2xl font-bold text-primary-400">Settings</h3>
-        </div>
+    <div className="grid grid-cols-3 max-h-screen min-h-screen overflow-y-auto">
+      <div className="col-span-1">
+        <Sidebar />
+      </div>
+      <div className="col-span-2 overflow-y-scroll p-4 h-screen border-l">
+        <Outlet />
+      </div>
+    </div>
+  );
+};
+
+const Sidebar = () => {
+  return (
+    <div>
+      <div className="p-4">
+        <h3 className="text-2xl font-bold text-primary-400">Settings</h3>
+        <p className="text-primary-700 text-sm">
+          Manage your entity settings here
+        </p>
+      </div>
+      <div className="my-4">
         <Button
           as={Link}
           radius="none"
           variant="light"
           className="flex justify-start"
           to="/settings/incident-types"
-          size="lg"
+          size="md"
         >
           Incident Types
         </Button>
         <Button
-          size="lg"
+          size="md"
           as={Link}
           radius="none"
           variant="light"
@@ -31,7 +47,7 @@ const _layout = () => {
         </Button>
         <Button
           as={Link}
-          size="lg"
+          size="md"
           radius="none"
           variant="light"
           className="flex justify-start"
@@ -39,9 +55,6 @@ const _layout = () => {
         >
           User Profiles
         </Button>
-      </div>
-      <div className="col-span-2 overflow-y-scroll h-screen border-l">
-        <Outlet />
       </div>
     </div>
   );

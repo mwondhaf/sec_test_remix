@@ -5,6 +5,7 @@ import { createIncidentSchema } from "./incident";
 import { incidentCategorySchema } from "./incident-category";
 import { personInvolvedSchema } from "./person-involved";
 import { profileSchema } from "./profile";
+import { requestorProfileSchema } from "./requestor";
 
 export {
   signInSchema,
@@ -14,4 +15,5 @@ export {
   departmentSchema,
   entitySchema,
   personInvolvedSchema,
+  requestorProfileSchema,
 };

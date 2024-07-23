@@ -7,15 +7,13 @@ import {
 } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { LogOut } from "lucide-react";
-import { errSession } from "~/flash.session";
-import { profileSession, profileSessionData } from "~/session";
+import { useTranslation } from "react-i18next";
+import { profileSession, profileSessionData } from "~/sessions/session.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { profiles, session } = await profileSessionData(request);
-  const erSession = await errSession.getSession(request.headers.get("Cookie"));
 
   const body = await request.formData();
-  const headers = new Headers();
 
   const selected_profile_id = body.get("profile");
 
@@ -38,7 +36,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     if (findProfile) {
       session.set("active_profile", findProfile);
-      return redirect("/", {
+
+      return redirect("/incidents", {
         headers: {
           "Set-Cookie": await profileSession.commitSession(session),
         },
@@ -66,13 +65,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 const SelectProfile = () => {
   const { profiles } = useLoaderData<typeof loader>();
   const actionData = useActionData<{ error: string | undefined }>();
+  let { t } = useTranslation();
 
   return (
     <div className="max-w-md mx-auto flex flex-col justify-center h-screen">
       <div className="space-y-2 pb-8">
-        <h2 className="text-2xl font-bold text-center">Select Profile</h2>
+        <h2 className="text-xl font-semibold text-center">
+          {t("select_profile")}
+        </h2>
         <p className="text-sm text-center text-gray-600">
-          You have {profiles?.length} profiles, select which one to use
+          {t("you_have")} {profiles?.length} {t("profiles")},{" "}
+          {t("select_which_one")}
         </p>
       </div>
       {actionData?.error && (
@@ -80,15 +83,15 @@ const SelectProfile = () => {
       )}
       {profiles && (
         <Form method="post" className="space-y-4">
-          <Select label="Select profile" name="profile">
+          <Select size="sm" label={t("select_profile")} name="profile">
             {profiles?.map((profile) => (
               <SelectItem key={profile.id}>
                 {profile?.entities?.name}
               </SelectItem>
             ))}
           </Select>
-          <Button color="primary" className="w-full" size="lg" type="submit">
-            Select
+          <Button color="primary" className="w-full" type="submit">
+            {t("select")}
           </Button>
         </Form>
       )}

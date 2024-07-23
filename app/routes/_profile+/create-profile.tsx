@@ -14,7 +14,6 @@ const resolver = zodResolver(profileSchema);
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { supabaseClient, headers } = createSupabaseServerClient(request);
-  console.log("actioning");
 
   const {
     errors,
@@ -31,8 +30,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   });
 
   if (error) {
-    console.log(error.message);
-
     return json({ success: false, error: error?.message }, { headers });
   }
 

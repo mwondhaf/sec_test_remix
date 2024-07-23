@@ -1,6 +1,6 @@
 import { redirect } from "@remix-run/node";
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import { profileSession, profileSessionData } from "~/session";
+import { profileSession, profileSessionData } from "~/sessions/session.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await profileSessionData(request);

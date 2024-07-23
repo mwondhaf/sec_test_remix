@@ -2,7 +2,7 @@ import { LoaderFunctionArgs, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Company, Entity, Profile } from "types";
 import { AddPersonProfile, ProfileCard } from "~/components";
-import { profileSessionData } from "~/session";
+import { profileSessionData } from "~/sessions/session.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {

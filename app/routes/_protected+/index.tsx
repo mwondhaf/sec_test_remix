@@ -7,13 +7,13 @@ import {
   IncidentTypesBar,
   SeverityDonut,
 } from "~/components";
-import { profileSessionData } from "~/session";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { parseAbsoluteToLocal } from "@internationalized/date";
 import React from "react";
 import { createSupabaseServerClient } from "~/supabase.server";
 import { Incident, IncidentCategory, IncidentType } from "types";
 import dayjs from "dayjs";
+import { profileSessionData } from "~/sessions/session.server";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -36,6 +36,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       "*, incident_type_id:incident_categories!incidents_category_id_fkey(incident_type_id)"
     )
     .gte("incident_time", from)
+    .eq("entity_id", active_profile?.entityId)
     .lte("incident_time", to);
 
   const { data: incident_types, error: typesError } = await supabaseClient

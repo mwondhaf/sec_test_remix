@@ -7,8 +7,8 @@ import {
   useLoaderData,
   useMatches,
 } from "@remix-run/react";
+import clsx from "clsx";
 import dayjs from "dayjs";
-import React from "react";
 import { Incident } from "types";
 import AddPeopleInvolvedModal from "~/components/incidents/AddPeopleInvolvedModal";
 import { createSupabaseServerClient } from "~/supabase.server";
@@ -18,8 +18,6 @@ import {
   setDepartmentsArray,
   setIncident,
 } from "~/utils/cache/dexie-cache";
-
-interface DetailedIncidentProps {}
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { incidentId } = params;
@@ -77,7 +75,7 @@ export async function clientLoader({
   return { incident, departments };
 }
 
-const DetailedIncident: React.FC<DetailedIncidentProps> = (props) => {
+const DetailedIncident = () => {
   const { incident } = useLoaderData<{
     incident: Incident | null;
   }>();
@@ -109,36 +107,48 @@ const DetailedIncident: React.FC<DetailedIncidentProps> = (props) => {
   }
 
   return (
-    <div className="h-[92dvh]">
-      <div className="pb-2 sticky border-b h-[8dvh] ">
+    <div className="h-[92dvh] px-4">
+      <div className="sticky flex flex-col justify-center border-b h-[10dvh] ">
         <div className="flex items-center justify-between">
           <div className="">
-            <h3 className="text-2xl font-bold text-gray-700">
+            <h3 className="text-xl font-semibold text-gray-600">
               {incident?.category?.name}
             </h3>
-            <p className="text-tiny">
+            <p className="text-tiny text-gray-500">
               Reported by: {incident?.reporter_name}/{" "}
               {incident?.reporter_department?.name}
             </p>
           </div>
-          <h3 className="text-xs font-bold text-gray-600">
-            Severity: {incident?.severity}
+          <h3 className="text-xs font-medium text-gray-600">
+            Severity:{" "}
+            <span
+              className={clsx(
+                "",
+                (incident?.severity as unknown) === "Medium"
+                  ? "text-orange-400"
+                  : (incident?.severity as unknown) === "High"
+                  ? "text-red-500"
+                  : "text-gray-600"
+              )}
+            >
+              {incident?.severity}
+            </span>
           </h3>
           <div className="">
-            <p className="text-sm font-bold text-gray-700">
+            <p className="text-sm font-medium text-gray-700">
               Time: {incident_time}
             </p>
             <p className="text-tiny text-gray-400">Closed: {close_time}</p>
           </div>
         </div>
       </div>
-      <div className="space-y-4 py-4 h-[84dvh] overflow-y-auto">
+      <div className="space-y-4 py-4 h-[82dvh] overflow-y-auto">
         <div className="">
-          <h1 className="text-md font-bold text-gray-600">Occurrence</h1>
+          <h1 className="font-medium text-sm text-gray-700">Occurrence</h1>
           <p className="text-gray-500 text-sm">{incident?.description}</p>
         </div>
         <div className="">
-          <h1 className="text-md font-bold text-gray-600">Action Taken</h1>
+          <h1 className="text-sm font-medium text-gray-700">Action Taken</h1>
           <p className="text-gray-500 text-sm">{incident?.action}</p>
         </div>
         <div className="">

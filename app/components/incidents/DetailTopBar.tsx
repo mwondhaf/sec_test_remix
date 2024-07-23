@@ -14,7 +14,6 @@ const DetailTopBar = () => {
   const { incidentId } = useParams();
   const matches = useMatches();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const editPage = matches.some(
     (match) => match.pathname === `/incidents/${incidentId}/edit-incident`
@@ -23,7 +22,7 @@ const DetailTopBar = () => {
   return (
     <>
       {incidentId && (
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-4">
           <div className="">
             {incidentId && !editPage ? (
               <Button
@@ -51,15 +50,15 @@ const DetailTopBar = () => {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button type="submit" isIconOnly radius="full" variant="light">
+            {/* <Button type="submit" isIconOnly radius="full" variant="light">
               <MailPlus size={18} />
             </Button>
             <Button type="submit" isIconOnly radius="full" variant="light">
               <File size={18} />
-            </Button>
+            </Button> */}
             <Button
               as={Link}
-              to={`/templates/single_incident?url=https://example.com/`}
+              to={`/templates/pdf?url=single_ir&id=${incidentId}`}
               target="_blank"
               isIconOnly
               radius="full"

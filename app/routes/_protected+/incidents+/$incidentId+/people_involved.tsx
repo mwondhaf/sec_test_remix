@@ -2,25 +2,16 @@ import { LoaderFunctionArgs, json } from "@remix-run/node";
 import { ClientLoaderFunctionArgs, useLoaderData } from "@remix-run/react";
 import { PersonInvolved } from "types";
 import { PeopleInvolvedList } from "~/components";
+import { useFetchIncidents } from "~/helpers/fetcher.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import { getPeopleInvolvedByIncidentId } from "~/utils/cache/dexie-cache";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { incidentId } = params;
-
-  const { supabaseClient } = createSupabaseServerClient(request);
+  const { fetchPeopleInvolved } = await useFetchIncidents(request);
 
   // get people involved
-  const { data: people_involved, error: peopleError } = await supabaseClient
-    .from("people_involved")
-    .select(
-      "*, person_department:departments!people_involved_person_dept_fkey(*)"
-    )
-    .eq("incident_id", incidentId);
-
-  if (peopleError) {
-    return { error: peopleError, people_involved: null };
-  }
+  const { people_involved } = await fetchPeopleInvolved(Number(incidentId));
 
   return { people_involved, error: null };
 };

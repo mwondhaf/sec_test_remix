@@ -54,8 +54,6 @@ export default function UpdatePersonProfile({
     parseTime(profile.shift_end!)
   );
 
-  console.log(shiftStartTime.toString());
-
   return (
     <>
       <div className="flex flex-wrap gap-3">

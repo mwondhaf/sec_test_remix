@@ -33,13 +33,13 @@ import {
   useSearchParams,
 } from "@remix-run/react";
 import dayjs from "dayjs";
-import { profileSessionData } from "~/session";
 import {
   getAllCategories,
   getAllDepartments,
   setCategoriesArray,
   setDepartmentsArray,
 } from "~/utils/cache/dexie-cache";
+import { profileSessionData } from "~/sessions/session.server";
 
 type FormData = zod.infer<typeof createIncidentSchema>;
 const resolver = zodResolver(createIncidentSchema);

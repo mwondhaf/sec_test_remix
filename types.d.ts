@@ -10,6 +10,7 @@ export type Entity = {
   name: string;
   code: string;
   makani: string;
+  email?: string;
 };
 
 export type Profile = {
@@ -27,6 +28,18 @@ export type Profile = {
   shift_start?: string;
   shift_end?: string;
   companyId?: string;
+};
+
+export type RequestorProfile = {
+  readonly id: number;
+  full_name: string;
+  email: string;
+  isActive: boolean;
+  role: "BASIC" | "ADMIN";
+  id_number: string;
+  entity_id: number;
+  department_id: number;
+  department: Department;
 };
 
 enum Severity {
@@ -54,6 +67,7 @@ export type Incident = {
   people_involved?: PersonInvolved[];
   is_resolved: boolean;
   incident_type_id: Pick<IncidentCategory, "incident_type_id">;
+  created_at: string;
 };
 
 export type PersonInvolved = {
@@ -80,4 +94,45 @@ export type IncidentCategory = {
 export type Department = {
   readonly id: number;
   name: string;
+};
+
+enum RequestStatus {
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+  "CANCELLED",
+  "ONGOING",
+  "COMPLETED",
+}
+
+export type CCTVRequest = {
+  readonly id: number;
+  reason: string;
+  location: string;
+  from_time: string;
+  to_time: string;
+  created_at: string;
+  status: RequestStatus;
+  requestor: RequestorProfile;
+  request_id: string;
+  details: string;
+  events_log?: EventLog[];
+  replies?: CCTVReply[];
+};
+
+export type EventLog = {
+  readonly id: number;
+  event: string;
+  created_at: string;
+  event_by: string;
+  remarks: string | null;
+  cctv_ref?: number;
+};
+
+export type CCTVReply = {
+  readonly id: number;
+  content: string;
+  created_at: string;
+  cctv_request: number;
+  reply_by: string;
 };

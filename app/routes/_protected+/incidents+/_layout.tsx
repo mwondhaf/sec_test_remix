@@ -1,21 +1,20 @@
+import { Button } from "@nextui-org/react";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import {
   ClientLoaderFunctionArgs,
   Outlet,
   json,
   useLoaderData,
+  useSearchParams,
 } from "@remix-run/react";
-import { Department, Incident, IncidentCategory } from "types";
+import { Incident } from "types";
 import { DetailTopBar, FilterBar, ListIncident } from "~/components";
-import { profileSessionData } from "~/session";
+import { profileSessionData } from "~/sessions/session.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import {
-  getAllCategories,
-  getAllDepartments,
+  filterIncidentsByQuery,
   getAllIncidents,
   getIncidentsBySeverity,
-  setCategoriesArray,
-  setDepartmentsArray,
   setIncidentsArray,
 } from "~/utils/cache/dexie-cache";
 
@@ -36,27 +35,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       .eq("entity_id", active_profile?.entityId)
       .order("incident_time", { ascending: false });
 
-    // const { data: departments, error: deptError } = await supabaseClient
-    //   .from("departments")
-    //   .select("*");
-
-    const { data: categories, error: catError } = await supabaseClient
-      .from("incident_categories")
-      .select("*");
-
     if (error) {
       return json({
         incidents: [] as Incident[],
-        // departments: [],
-        categories: null,
         error: error?.message,
       });
     }
 
     return json({
       incidents: (incidents as unknown as Incident[]) ?? ([] as Incident[]),
-      // departments: departments ?? ([] as Department[]),
-      categories: categories,
     });
   }
 
@@ -68,27 +55,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     .eq("entity_id", active_profile?.entityId)
     .order("incident_time", { ascending: false });
 
-  // const { data: departments, error: deptError } = await supabaseClient
-  //   .from("departments")
-  //   .select("*");
-
-  const { data: categories, error: catError } = await supabaseClient
-    .from("incident_categories")
-    .select("*");
-
-  if (error || catError) {
+  if (error) {
     return json({
       incidents: null,
-      // departments: [],
-      categories: null,
       error: error?.message,
     });
   }
 
   return json({
     incidents: (incidents as unknown as Incident[]) ?? ([] as Incident[]),
-    // departments: departments ?? ([] as Department[]),
-    categories: categories,
   });
 };
 
@@ -102,7 +77,10 @@ export async function clientLoader({
     | "Medium"
     | "High";
 
-  if (severity) {
+  const query = url.searchParams.get("q") as string;
+
+  // severity and no query
+  if (severity && !query) {
     const severity_incidents = await getIncidentsBySeverity(severity);
 
     if (severity_incidents.length > 0)
@@ -114,39 +92,50 @@ export async function clientLoader({
     return json({ incidents });
   }
 
-  const [cachedIncidents, cachedCats] = await Promise.all([
-    getAllIncidents(),
-    // getAllDepartments(),
-    getAllCategories(),
-  ]);
+  // query && !severity
+  if (query && !severity) {
+    const query_incidents = await filterIncidentsByQuery(query);
 
-  if (
-    cachedIncidents.length > 0 &&
-    // cachedDepts.length > 0 &&
-    cachedCats.length > 0
-  )
+    if (query_incidents.length > 0) return json({ incidents: query_incidents });
+
+    return json({ incidents: [], message: "No Incident Found" });
+  }
+
+  if (severity && query) {
+    const query_incidents = await filterIncidentsByQuery(query, severity);
+
+    if (query_incidents.length > 0) {
+      const filtered = query_incidents.filter(
+        (incident) => (incident.severity as unknown as string) === severity
+      );
+      return json({ incidents: filtered });
+    }
+
+    return json({ incidents: [], message: "No Incident Found" });
+  }
+
+  const [cachedIncidents] = await Promise.all([getAllIncidents()]);
+
+  if (cachedIncidents.length > 0)
     return json({
       incidents: cachedIncidents,
-      // departments: cachedDepts,
-      // categories: cachedCats,
     });
 
   // @ts-ignore
-  let { incidents, categories } = await serverLoader();
+  let { incidents } = await serverLoader();
 
-  await Promise.all([
-    setIncidentsArray(incidents),
-    // setDepartmentsArray(departments),
-    setCategoriesArray(categories),
-  ]);
+  await Promise.all([setIncidentsArray(incidents)]);
 
-  return { incidents, categories };
+  return { incidents };
 }
 
 clientLoader.hydrate = true;
 
 const Layout = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { incidents } = useLoaderData<{ incidents: Incident[] }>();
+
+  const query = searchParams.get("q");
 
   return (
     <div className="">
@@ -158,11 +147,34 @@ const Layout = () => {
           <DetailTopBar />
         </div>
       </div>
-      <div className="grid grid-cols-6 h-[92dvh] ">
-        <div className="h-full overflow-y-auto col-span-2">
-          {incidents.map((incident) => (
-            <ListIncident {...{ incident }} key={incident.id} />
-          ))}
+      <div className="grid grid-cols-6 h-[92dvh]">
+        <div className="h-full overflow-y-auto col-span-2 bg-white">
+          {incidents.length === 0 ? (
+            <div className="text-center my-10 items-center h-full space-y-4">
+              <h1>No Incidents Found</h1>
+              {query && (
+                <>
+                  <Button
+                    onClick={() => {
+                      searchParams.delete("q");
+                      setSearchParams(searchParams);
+                    }}
+                    variant="flat"
+                    size="sm"
+                    radius="full"
+                  >
+                    Clear search
+                  </Button>
+                </>
+              )}
+            </div>
+          ) : (
+            <>
+              {incidents.map((incident) => (
+                <ListIncident {...{ incident }} key={incident.id} />
+              ))}
+            </>
+          )}
         </div>
         <div className="col-span-4 border-l px-4">
           <Outlet />

@@ -1,6 +1,7 @@
 import Dexie from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
+  CCTVRequest,
   Department,
   Entity,
   Incident,
@@ -16,6 +17,7 @@ import {
   personInvolvedSchema,
 } from "~/form-schemas";
 import { incidentTypeSchema } from "~/form-schemas/incident-type";
+import { cctvSchema } from "~/form-schemas/requestor";
 
 // Define your Dexie database schema
 class CacheDatabase extends Dexie {
@@ -25,6 +27,7 @@ class CacheDatabase extends Dexie {
   incident_types: Dexie.Table<IncidentType, number>;
   people_involved: Dexie.Table<PersonInvolved, number>;
   entities: Dexie.Table<Entity, number>;
+  cctv_requests: Dexie.Table<CCTVRequest, number>;
 
   constructor() {
     super("CacheDatabase");
@@ -35,6 +38,7 @@ class CacheDatabase extends Dexie {
       incident_types: "id",
       people_involved: "incident_id",
       entities: "id",
+      cctv_requests: "id",
     });
     this.incidents = this.table("incidents");
     this.incident_categories = this.table("incident_categories");
@@ -42,6 +46,7 @@ class CacheDatabase extends Dexie {
     this.incident_types = this.table("incident_types");
     this.people_involved = this.table("people_involved");
     this.entities = this.table("entities");
+    this.cctv_requests = this.table("cctv_requests");
   }
 }
 
@@ -152,6 +157,15 @@ export const getAllCategories = async (): Promise<IncidentCategory[]> => {
     return [];
   }
 };
+// clear categories
+export const clearCategories = async () => {
+  try {
+    await db.incident_categories.clear();
+    console.log("All Categories cleared from cache.");
+  } catch (error) {
+    console.error("Error clearing all categories from cache:", error);
+  }
+};
 
 // DEPARTMENTS
 // set departments array
@@ -230,14 +244,43 @@ export const getIncidentsBySeverity = async (
   }
 };
 
+// Function to filter incidents by query
+export const filterIncidentsByQuery = async (
+  query: string | number,
+  severity?: "Low" | "Medium" | "High"
+): Promise<Incident[]> => {
+  try {
+    const incidents = await db.incidents.toArray();
+
+    const filteredIncidents = incidents.filter((incident) => {
+      if (!isNaN(Number(query))) {
+        return incident.id === Number(query);
+      } else if (typeof query === "string") {
+        return (
+          incident.description?.toLowerCase().includes(query.toLowerCase()) ||
+          incident.action?.toLowerCase().includes(query.toLowerCase())
+        );
+      }
+      return false;
+    });
+
+    filteredIncidents.forEach((incident) =>
+      createIncidentSchema.parse(incident)
+    );
+
+    return filteredIncidents;
+  } catch (error) {
+    console.error("Error filtering incidents by query:", error);
+    return [];
+  }
+};
+
 // PEOPLE INVOLVED
 // Function to set an array of incidents
 export const setPeopleInvolvedArray = async (people: PersonInvolved[]) => {
   try {
     // Validate each incident in the array before setting
     people.forEach((person) => personInvolvedSchema.parse(person));
-
-    console.log("people set");
 
     await db.people_involved.bulkPut(people);
   } catch (error) {
@@ -288,6 +331,29 @@ export const getAllEntities = async (): Promise<Entity[]> => {
     return entities ? entities : [];
   } catch (error) {
     console.error("Error getting all entities from cache:", error);
+    return [];
+  }
+};
+
+// CCTV REQUESTS
+export const setCCTVRequestsArray = async (requests: CCTVRequest[]) => {
+  try {
+    // departments.forEach((department) => departmentSchema.parse(department));
+    requests.forEach((request) => cctvSchema.parse(request));
+    await db.cctv_requests.bulkPut(requests);
+  } catch (error) {
+    console.error("Error setting CCTV requests array in cache:", error);
+  }
+};
+
+// get cctv requests
+export const getCCTVRequests = async (): Promise<CCTVRequest[]> => {
+  try {
+    const requests = await db.cctv_requests.toArray();
+    requests.forEach((request) => cctvSchema.parse(request));
+    return requests;
+  } catch (error) {
+    console.error("Error getting all CCTV requests from cache:", error);
     return [];
   }
 };

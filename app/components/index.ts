@@ -2,6 +2,11 @@ import CreateDepartment from "./CreateDepartment";
 import CreateIncidentCategory from "./CreateIncidentCategory";
 import CreateIncidentType from "./CreateIncidentType";
 import Sidebar from "./Sidebar";
+import CCTVFilterBar from "./cctv/CCTVFilterBar";
+import ListRequest from "./cctv/ListRequest";
+import ChooseOption from "./common/ChooseOption";
+import ComingSoon from "./common/ComingSoon";
+import CCTVRequestReplyModal from "./cctv/CCTVRequestReplyModal";
 import { CategoryGraph } from "./dashboard/category-graph";
 import DashboardBlocks from "./dashboard/dashboard-blocks";
 import { IncidentTypesBar } from "./dashboard/incident-types-bar";
@@ -13,7 +18,13 @@ import PeopleInvolvedList from "./incidents/PeopleInvolvedList";
 import AddPersonProfile from "./settings/profile/AddPersonProfile";
 import ProfileCard from "./settings/profile/ProfileCard";
 import UpdatePersonProfile from "./settings/profile/UpdatePersonProfile";
-import { SingleIncidentPdf } from "./templates/singleIncident";
+import Footer from "./templates/Footer";
+import Header from "./templates/Header";
+import SingleIncidentPdf from "./templates/SingleIncident";
+import DispatchTable from "./templates/dispatch/DispatchTable";
+import CCTVRepliesAccordion from "./cctv/CCTVRepliesAccordion";
+import CCTVRequestApprovalModal from "./cctv/CCTVRequestApprovalModal";
+
 export {
   Sidebar,
   CreateIncidentCategory,
@@ -31,4 +42,14 @@ export {
   IncidentTypesBar,
   CategoryGraph,
   SingleIncidentPdf,
+  Footer,
+  Header,
+  DispatchTable,
+  ChooseOption,
+  ComingSoon,
+  ListRequest,
+  CCTVFilterBar,
+  CCTVRequestReplyModal,
+  CCTVRepliesAccordion,
+  CCTVRequestApprovalModal,
 };

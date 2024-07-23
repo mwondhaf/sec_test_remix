@@ -6,6 +6,7 @@ import {
   useFetcher,
   useLoaderData,
 } from "@remix-run/react";
+import { Trash2Icon } from "lucide-react";
 import { Department } from "types";
 import { CreateDepartment } from "~/components";
 import { errSession } from "~/flash.session";
@@ -106,11 +107,18 @@ const Departments = () => {
       </div>
       {data?.map((d) => (
         <div key={d.id} className="flex items-center justify-between my-4">
-          <h2>{d.name}</h2>
-          <div className="">
+          <h2 className="text-gray-600 text-sm">{d.name}</h2>
+          <div className="w-3/4">
             <fetcher.Form method="delete">
-              <Button isIconOnly type="submit">
-                <TrashIcon />
+              <Button
+                isIconOnly
+                radius="full"
+                color="danger"
+                variant="light"
+                size="sm"
+                type="submit"
+              >
+                <Trash2Icon size={16} />
               </Button>
               <input type="hidden" name="intent" value={"delete_dept"} />
               <input type="hidden" name="dept_id" value={d.id} />

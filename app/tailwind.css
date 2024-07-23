@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  font-family: "Inter Variable", sans-serif;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  background: #e5e7eb; /* Tailwind's gray-200 color */
+  z-index: -1;
+}
+.timeline-item {
+  position: relative;
+}
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6b7280; /* Tailwind's gray-500 color */
+}

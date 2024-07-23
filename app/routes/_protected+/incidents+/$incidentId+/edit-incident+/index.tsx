@@ -38,7 +38,7 @@ import {
 } from "@nextui-org/react";
 import dayjs from "dayjs";
 import { Controller } from "react-hook-form";
-import { profileSessionData } from "~/session";
+import { profileSessionData } from "~/sessions/session.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { incidentId } = params;
@@ -238,49 +238,79 @@ const EditIncident = () => {
             Save Changes
           </Button>
         </div>
-        <div className="grid grid-cols-2 gap-2 max-h-[84dvh] overflow-y-scroll">
-          <DatePicker
-            size="sm"
-            label="Incident Date & Time"
-            variant="bordered"
-            hideTimeZone
-            showMonthAndYearPickers
-            hourCycle={24}
-            defaultValue={parseAbsoluteToLocal(incident.incident_time!)}
-            onChange={(value) => {
-              setSearchParams((prev) => {
-                prev.set("inc_time", calculateDateTime(value));
-                return prev;
-              });
-            }}
-            minValue={parseAbsoluteToLocal(incident.incident_time!).subtract({
-              hours: 12,
-            })}
-            maxValue={now(getLocalTimeZone())}
-            isInvalid={!!errors.incident_time?.message}
-            errorMessage={errors?.incident_time?.message?.toString()}
-            isRequired
-          />
-          <DatePicker
-            size="sm"
-            label="Time Completed"
-            variant="bordered"
-            hideTimeZone
-            showMonthAndYearPickers
-            hourCycle={24}
-            defaultValue={parseAbsoluteToLocal(incident.incident_close_time!)}
-            onChange={(value) => {
-              setSearchParams((prev) => {
-                prev.set("close_time", calculateDateTime(value));
-                return prev;
-              });
-            }}
-            minValue={inc_time ? parseAbsoluteToLocal(inc_time) : undefined}
-            maxValue={inc_time ? parseAbsoluteToLocal(inc_time) : undefined}
-            isInvalid={!!errors.incident_close_time?.message}
-            errorMessage={errors?.incident_close_time?.message?.toString()}
-            isRequired
-          />
+        <div className="grid grid-cols-2 gap-3 max-h-[84dvh] overflow-y-scroll">
+          <div className="col-span-2">
+            <div className="grid grid-cols-3 gap-3">
+              <DatePicker
+                size="sm"
+                label="Incident Date & Time"
+                hideTimeZone
+                showMonthAndYearPickers
+                hourCycle={24}
+                defaultValue={parseAbsoluteToLocal(incident.incident_time!)}
+                onChange={(value) => {
+                  setSearchParams((prev) => {
+                    prev.set("inc_time", calculateDateTime(value));
+                    return prev;
+                  });
+                }}
+                minValue={parseAbsoluteToLocal(
+                  incident.incident_time!
+                ).subtract({
+                  hours: 12,
+                })}
+                maxValue={now(getLocalTimeZone())}
+                isInvalid={!!errors.incident_time?.message}
+                errorMessage={errors?.incident_time?.message?.toString()}
+                isRequired
+              />
+              <DatePicker
+                size="sm"
+                label="Time Completed"
+                hideTimeZone
+                showMonthAndYearPickers
+                hourCycle={24}
+                defaultValue={parseAbsoluteToLocal(
+                  incident.incident_close_time!
+                )}
+                onChange={(value) => {
+                  setSearchParams((prev) => {
+                    prev.set("close_time", calculateDateTime(value));
+                    return prev;
+                  });
+                }}
+                minValue={inc_time ? parseAbsoluteToLocal(inc_time) : undefined}
+                maxValue={inc_time ? parseAbsoluteToLocal(inc_time) : undefined}
+                isInvalid={!!errors.incident_close_time?.message}
+                errorMessage={errors?.incident_close_time?.message?.toString()}
+                isRequired
+              />
+              <Controller
+                name="severity"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Select
+                    size="sm"
+                    label="Severity"
+                    placeholder="Select severity"
+                    {...field}
+                    isInvalid={!!errors.severity?.message}
+                    errorMessage={errors?.severity?.message?.toString()}
+                    defaultSelectedKeys={[incident.severity]}
+                    {...register("severity")}
+                  >
+                    {Object.values(Severity).map((severity) => (
+                      <SelectItem key={severity} value={severity}>
+                        {severity}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                )}
+              />
+            </div>
+          </div>
+
           <Controller
             name="category_id"
             control={control}
@@ -305,28 +335,54 @@ const EditIncident = () => {
             )}
           />
           <Controller
-            name="severity"
+            name="incident_location"
             control={control}
             rules={{ required: true }}
             render={({ field }) => (
-              <Select
+              <Input
                 size="sm"
-                label="Severity"
-                placeholder="Select severity"
+                label="Incident Location"
                 {...field}
-                isInvalid={!!errors.severity?.message}
-                errorMessage={errors?.severity?.message?.toString()}
-                defaultSelectedKeys={[incident.severity]}
-                {...register("severity")}
-              >
-                {Object.values(Severity).map((severity) => (
-                  <SelectItem key={severity} value={severity}>
-                    {severity}
-                  </SelectItem>
-                ))}
-              </Select>
+                isRequired
+                isInvalid={!!errors.incident_location?.message}
+                errorMessage={errors?.incident_location?.message?.toString()}
+              />
             )}
           />
+
+          <div className="col-span-2">
+            <Controller
+              name="description"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Textarea
+                  label="Description"
+                  {...field}
+                  isRequired
+                  isInvalid={!!errors.description?.message}
+                  errorMessage={errors?.description?.message?.toString()}
+                />
+              )}
+            />
+          </div>
+          <div className="col-span-2">
+            <Controller
+              name="action"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Textarea
+                  label="Action"
+                  {...field}
+                  isRequired
+                  isInvalid={!!errors.action?.message}
+                  errorMessage={errors?.action?.message?.toString()}
+                />
+              )}
+            />
+          </div>
+
           <Controller
             name="reporter_name"
             control={control}
@@ -365,55 +421,6 @@ const EditIncident = () => {
               </Select>
             )}
           />
-          <div className="col-span-2">
-            <Controller
-              name="incident_location"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input
-                  size="sm"
-                  label="Incident Location"
-                  {...field}
-                  isRequired
-                  isInvalid={!!errors.incident_location?.message}
-                  errorMessage={errors?.incident_location?.message?.toString()}
-                />
-              )}
-            />
-          </div>
-          <div className="col-span-2">
-            <Controller
-              name="description"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Textarea
-                  label="Description"
-                  {...field}
-                  isRequired
-                  isInvalid={!!errors.description?.message}
-                  errorMessage={errors?.description?.message?.toString()}
-                />
-              )}
-            />
-          </div>
-          <div className="col-span-2">
-            <Controller
-              name="action"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Textarea
-                  label="Action"
-                  {...field}
-                  isRequired
-                  isInvalid={!!errors.action?.message}
-                  errorMessage={errors?.action?.message?.toString()}
-                />
-              )}
-            />
-          </div>
           <div className="">
             <Controller
               name="is_resolved"
