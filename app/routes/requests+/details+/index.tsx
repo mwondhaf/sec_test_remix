@@ -13,6 +13,7 @@ import {
   requestorProfileSession,
   requestorProfileSessionData,
 } from "~/sessions/session.server";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
 const reports = [
   // {
@@ -41,7 +42,7 @@ const reports = [
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { requestor_profile, session } = await requestorProfileSessionData(
     request
   );

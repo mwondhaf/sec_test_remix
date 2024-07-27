@@ -27,9 +27,10 @@ import {
   requestorProfileSession,
   requestorProfileSessionData,
 } from "~/sessions/session.server";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const { data: departments } = await supabaseClient
     .from("departments")
@@ -55,7 +56,7 @@ type FormData = zod.infer<typeof cctvSchema>;
 const resolver = zodResolver(cctvSchema);
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { requestor_profile, session: requestor_session } =
     await requestorProfileSessionData(request);
 

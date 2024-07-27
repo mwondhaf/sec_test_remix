@@ -11,6 +11,7 @@ import clsx from "clsx";
 import dayjs from "dayjs";
 import { Incident } from "types";
 import AddPeopleInvolvedModal from "~/components/incidents/AddPeopleInvolvedModal";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import {
   getAllDepartments,
@@ -22,7 +23,7 @@ import {
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { incidentId } = params;
 
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const { data: incident, error } = await supabaseClient
     .from("incidents")

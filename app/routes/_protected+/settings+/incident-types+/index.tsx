@@ -19,6 +19,7 @@ import {
 import { Delete, Trash2Icon, X } from "lucide-react";
 import { IncidentCategory } from "types";
 import { CreateIncidentCategory, CreateIncidentType } from "~/components";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import {
   getIncidentTypes,
@@ -26,7 +27,7 @@ import {
 } from "~/utils/cache/dexie-cache";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { data, error } = await supabaseClient
     .from("incident-types")
     .select("*");

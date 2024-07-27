@@ -19,10 +19,11 @@ import { getValidatedFormData, useRemixForm } from "remix-hook-form";
 import zod from "zod";
 import { errSession } from "~/flash.session";
 import { requestorProfileSchema } from "~/form-schemas";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const { data: departments } = await supabaseClient
     .from("departments")
@@ -48,7 +49,7 @@ type FormData = zod.infer<typeof requestorProfileSchema>;
 const resolver = zodResolver(requestorProfileSchema);
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const session = await errSession.getSession(request.headers.get("Cookie"));
 
   const {

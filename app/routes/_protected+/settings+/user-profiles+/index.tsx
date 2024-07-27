@@ -2,11 +2,12 @@ import { LoaderFunctionArgs, json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Company, Entity, Profile } from "types";
 import { AddPersonProfile, ProfileCard } from "~/components";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { profileSessionData } from "~/sessions/session.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { active_profile } = await profileSessionData(request);
 
   const { data: profiles, error } =

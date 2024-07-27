@@ -8,5 +8,6 @@ export default {
   select_which_one: "select which one to use",
   select: "Select",
   password: "Password",
+  repeat_password: "Repeat Password",
   sign_in: "Sign In",
 };

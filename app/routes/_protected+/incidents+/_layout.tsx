@@ -9,6 +9,7 @@ import {
 } from "@remix-run/react";
 import { Incident } from "types";
 import { DetailTopBar, FilterBar, ListIncident } from "~/components";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { profileSessionData } from "~/sessions/session.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import {
@@ -19,7 +20,7 @@ import {
 } from "~/utils/cache/dexie-cache";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { active_profile } = await profileSessionData(request);
 
   const url = new URL(request.url);

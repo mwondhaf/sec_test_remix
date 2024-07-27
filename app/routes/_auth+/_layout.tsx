@@ -1,9 +1,10 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { Outlet, redirect } from "@remix-run/react";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const {
     data: { user },
   } = await supabaseClient.auth.getUser();

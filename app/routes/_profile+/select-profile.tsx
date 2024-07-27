@@ -50,6 +50,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session, profiles } = await profileSessionData(request);
+
   if (profiles?.length === 1) {
     session.set("active_profile", profiles[0]);
     return redirect("/", {

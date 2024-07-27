@@ -136,3 +136,5 @@ export type CCTVReply = {
   cctv_request: number;
   reply_by: string;
 };
+
+export type Error = { error?: string };

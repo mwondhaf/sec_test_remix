@@ -32,6 +32,7 @@ import {
   getCCTVRequests,
   setCCTVRequestsArray,
 } from "~/utils/cache/dexie-cache";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
 dayjs.extend(localizedFormat);
 
@@ -42,7 +43,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const page = Number(url.searchParams.get("page") || "1");
   const offset = (page - 1) * rowsPerPage;
 
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const { data, error, count } = await supabaseClient
     .from("cctv_requests")

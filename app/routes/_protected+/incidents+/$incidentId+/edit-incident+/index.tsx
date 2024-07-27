@@ -39,10 +39,11 @@ import {
 import dayjs from "dayjs";
 import { Controller } from "react-hook-form";
 import { profileSessionData } from "~/sessions/session.server";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { incidentId } = params;
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const url = new URL(request.url);
   const inc_time = url.searchParams.get("inc_time");
@@ -141,7 +142,7 @@ enum Status {
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { active_profile } = await profileSessionData(request);
 
   const url = new URL(request.url);

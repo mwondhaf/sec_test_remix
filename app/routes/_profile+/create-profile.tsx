@@ -7,13 +7,14 @@ import { getValidatedFormData, useRemixForm } from "remix-hook-form";
 import { Company, Entity } from "types";
 import * as zod from "zod";
 import { profileSchema } from "~/form-schemas";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 type FormData = zod.infer<typeof profileSchema>;
 const resolver = zodResolver(profileSchema);
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabaseClient, headers } = createSupabaseServerClient(request);
+  // const { supabaseClient, headers } = createSupabaseServerClient(request);
 
   const {
     errors,
@@ -30,7 +31,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   });
 
   if (error) {
-    return json({ success: false, error: error?.message }, { headers });
+    return json({ success: false, error: error?.message });
   }
 
   return redirect("/");
@@ -40,7 +41,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const email = url.searchParams.get("email");
 
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const { data: companies } = await supabaseClient
     .from("companies")

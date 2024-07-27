@@ -1,10 +1,6 @@
 // app/sessions.ts
 import { createCookieSessionStorage } from "@remix-run/node"; // or cloudflare/deno
 
-type SessionData = {
-  userId: string;
-};
-
 type SessionFlashData = {
   error: string;
   success: string;

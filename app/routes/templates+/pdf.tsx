@@ -5,12 +5,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Footer, Header, SingleIncidentPdf } from "~/components";
 import { createSupabaseServerClient } from "~/supabase.server";
 import i18nextServer from "~/modules/i18next.server";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const locale = await i18nextServer.getLocale(request);
 
   const baseUrl = "http://localhost"; //TODO get from env
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const url = new URL(request.url);
   const incidentId = url.searchParams.get("id");

@@ -7,6 +7,7 @@ import { FileWarning } from "lucide-react";
 import { Profile } from "types";
 import { Sidebar } from "~/components";
 import { errSession } from "~/flash.session";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { profileSession, profileSessionData } from "~/sessions/session.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import {
@@ -19,14 +20,21 @@ import {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session, active_profile } = await profileSessionData(request);
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const errorSession = await errSession.getSession(
     request.headers.get("Cookie")
   );
 
+  // const {
+  //   data: { user },
+  //   error,
+  // } = await supabaseClient.auth.getUser();
   const {
     data: { user },
+    error,
   } = await supabaseClient.auth.getUser();
+
+  console.log({ user });
 
   if (!user) {
     return redirect("/sign-in");

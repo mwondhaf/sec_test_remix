@@ -1,9 +1,10 @@
 import { redirect } from "@remix-run/node";
 import type { ActionFunctionArgs } from "@remix-run/node";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabaseClient, headers } = createSupabaseServerClient(request);
+  // const { supabaseClient, headers } = createSupabaseServerClient(request);
   // check if user is logged in
 
   const {
@@ -14,7 +15,5 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
   // sign out
   await supabaseClient.auth.signOut();
-  return redirect("/clear-data", {
-    headers,
-  });
+  return redirect("/clear-data");
 };

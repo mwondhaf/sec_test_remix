@@ -1,10 +1,11 @@
 import dayjs from "dayjs";
 import { Incident } from "types";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { profileSessionData } from "~/sessions/session.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 export const useFetchIncidents = async (request: Request) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { active_profile } = await profileSessionData(request);
 
   const fetchAllIncidents = async (

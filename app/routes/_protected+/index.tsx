@@ -14,12 +14,13 @@ import { createSupabaseServerClient } from "~/supabase.server";
 import { Incident, IncidentCategory, IncidentType } from "types";
 import dayjs from "dayjs";
 import { profileSessionData } from "~/sessions/session.server";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { active_profile } = await profileSessionData(request);
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const url = new URL(request.url);
   let from = url.searchParams.get("from");

@@ -9,13 +9,14 @@ import {
   CCTVRequestApprovalModal,
   CCTVRequestReplyModal,
 } from "~/components";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import { setCache } from "~/utils/cache";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   // params
   const { cctvRequestId } = params;
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const { data, error } = await supabaseClient
     .from("cctv_requests")

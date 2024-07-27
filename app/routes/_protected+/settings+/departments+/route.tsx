@@ -10,11 +10,12 @@ import { Trash2Icon } from "lucide-react";
 import { Department } from "types";
 import { CreateDepartment } from "~/components";
 import { errSession } from "~/flash.session";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import { getAllDepartments } from "~/utils/cache/dexie-cache";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { data, error } = await supabaseClient.from("departments").select("*");
 
   if (error) {
@@ -41,7 +42,7 @@ export const clientLoader = async ({
 };
 
 export const action = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const session = await errSession.getSession(request.headers.get("Cookie"));
 
   const formData = await request.formData();

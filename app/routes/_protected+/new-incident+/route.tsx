@@ -40,12 +40,13 @@ import {
   setDepartmentsArray,
 } from "~/utils/cache/dexie-cache";
 import { profileSessionData } from "~/sessions/session.server";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
 type FormData = zod.infer<typeof createIncidentSchema>;
 const resolver = zodResolver(createIncidentSchema);
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const url = new URL(request.url);
   const inc_time = url.searchParams.get("inc_time");
@@ -90,7 +91,7 @@ export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
 clientLoader.hydrate = true;
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { active_profile } = await profileSessionData(request);
 
   const url = new URL(request.url);

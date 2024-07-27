@@ -11,9 +11,10 @@ import {
 import { getCache } from "~/utils/cache";
 import { CCTVRequest } from "types";
 import { encryptedDataJWT } from "~/utils/jose.server";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const { active_profile } = await profileSessionData(request);
   const session = await errSession.getSession(request.headers.get("Cookie"));
 
@@ -44,6 +45,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       const jwt = await encryptedDataJWT({
         cctv_ref: active_request.request_id,
         approval_for: "cctv",
+        cctv_id: active_request.id,
+        approver_email: approver_email,
       });
 
       await sendCCTVApprovalEmail({

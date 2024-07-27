@@ -1,11 +1,12 @@
 import { ActionFunctionArgs, redirect } from "@remix-run/node";
 import { errSession } from "~/flash.session";
 import { profileSchema } from "~/form-schemas";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const session = await errSession.getSession(request.headers.get("Cookie"));
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
 
   const formData = await request.formData();
 

@@ -3,6 +3,7 @@ import { personInvolvedSchema } from "~/form-schemas";
 import * as zod from "zod";
 import { errSession } from "~/flash.session";
 import { createSupabaseServerClient } from "~/supabase.server";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
 type FormData = zod.infer<typeof personInvolvedSchema>;
 
@@ -10,7 +11,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const data = Object.fromEntries(formData);
 
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const session = await errSession.getSession(request.headers.get("Cookie"));
 
   const finalData = {

@@ -16,6 +16,7 @@ import {
 import { Form, useLoaderData, useNavigate } from "@remix-run/react";
 import React from "react";
 import { errSession } from "~/flash.session";
+import { supabaseClient } from "~/services/supabase-auth.server";
 import { createSupabaseServerClient } from "~/supabase.server";
 import { decryptToken } from "~/utils/jose.server";
 
@@ -40,10 +41,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     });
   }
 
+  console.log({ data });
+
   if (data.approval_for === "cctv") {
     return json({
       cctv_ref: data.cctv_ref,
       approval_for: data.approval_for,
+      cctv_id: data.cctv_id,
+      approver_email: data.approver_email,
     });
   }
 
@@ -51,29 +56,42 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request);
+  // const { supabaseClient } = createSupabaseServerClient(request);
   const session = await errSession.getSession(request.headers.get("Cookie"));
 
   const formData = await request.formData();
   const intent = formData.get("intent") as string;
   const _action = formData.get("_action") as string;
   const ref_id = formData.get("ref_id") as string;
+  const id = formData.get("id") as string;
+  const approver_email = formData.get("approver_email") as string;
+
+  console.log({ approver_email });
 
   switch (intent) {
     case "cctv":
-      const { data, error } = await supabaseClient
-        .from("cctv_requests")
-        .update({
-          status: _action.toUpperCase(),
-        })
-        .eq("request_id", ref_id);
-      if (!error) {
+      const [updateResult, insertResult] = await Promise.all([
+        supabaseClient
+          .from("cctv_requests")
+          .update({ status: _action.toUpperCase() })
+          .eq("request_id", ref_id),
+
+        supabaseClient.from("cctv_events_log").insert({
+          cctv_ref: id,
+          event: _action,
+          event_by: approver_email,
+        }),
+      ]);
+
+      const { error: updateError } = updateResult;
+      const { error: insertError } = insertResult;
+      if (!updateError || insertError) {
         session.flash("success", `Request ${_action} successfully`);
         return redirect("/requests", {
           headers: { "Set-Cookie": await errSession.commitSession(session) },
         });
       }
-      session.flash("error", error.message);
+      session.flash("error", "Something wrong has happened");
       return redirect("/requests", {
         headers: { "Set-Cookie": await errSession.commitSession(session) },
       });
@@ -87,26 +105,28 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 const CCTVRequestApproval = () => {
   const data = useLoaderData<any>();
-  const navigate = useNavigate();
 
   if (data?.approval_for === "cctv") {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-
     return (
       <div>
-        <Modal backdrop={"blur"} isOpen={true} onClose={onClose}>
+        <Modal backdrop={"blur"} isOpen={true} closeButton={false}>
           <ModalContent>
             {(onClose) => (
               <Form method="post">
                 <ModalHeader className="flex flex-col gap-1">
-                  Modal Title
+                  Request {data?.cctv_ref}
                 </ModalHeader>
                 <ModalBody>
+                  <input
+                    type="hidden"
+                    name="approver_email"
+                    value={data.approver_email}
+                  />
+                  <input type="hidden" name="id" value={data.cctv_id} />
                   <input type="hidden" name="ref_id" value={data.cctv_ref} />
                   <input type="hidden" name="intent" value={"cctv"} />
                   <p className="text-gray-600 text-sm">
-                    Magna exercitation reprehenderit magna aute tempor cupidatat
-                    Culpa deserunt nostrud ad veniam.
+                    Hi, approve or reject this {data?.approval_for} request?
                   </p>
                 </ModalBody>
                 <ModalFooter>

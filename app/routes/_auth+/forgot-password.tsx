@@ -16,22 +16,16 @@ import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import i18next from "node_modules/i18next";
-import { clearCategories } from "~/utils/cache/dexie-cache";
-import { authCookie, supabaseClient } from "~/services/supabase-auth.server";
-import { setAuthSession } from "~/modules/supabase-auth.server";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
-type FormData = zod.infer<typeof signInSchema>;
-const resolver = zodResolver(signInSchema);
+const pickedSchema = signInSchema.pick({ email: true });
 
-// clear data
-export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
-  await clearCategories();
-  return {};
-};
+type FormData = zod.infer<typeof pickedSchema>;
+const resolver = zodResolver(pickedSchema);
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   // const { supabaseClient, headers } = createSupabaseServerClient(request);
-  const session = await authCookie.getSession(request.headers.get("Cookie"));
+
   const {
     errors,
     data,
@@ -42,34 +36,26 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ errors, defaultValues, error: null });
   }
 
-  // const { error } = await supabaseClient.auth.signInWithPassword({
-  //   email: data.email,
-  //   password: data.password,
-  // });
+  const { data: resetData, error } =
+    await supabaseClient.auth.resetPasswordForEmail(data.email, {
+      redirectTo: `${process.env.BASE_URL}/update-password`,
+    });
 
-  const { data: nData, error } = await supabaseClient.auth.signInWithPassword({
-    email: data.email,
-    password: data.password,
-  });
+  // const { error } = await supabaseClient.auth.signInWithOtp({
+  //   email: data.email,
+  //   options: {
+  //     emailRedirectTo: `${process.env.BASE_URL}/update-password`,
+  //   },
+  // });
 
   if (error) {
     return json({ success: false, error: error?.message });
   }
 
-  session.set("auth", {
-    access_token: nData.session.access_token,
-    refresh_token: nData.session.refresh_token,
-  });
-
-  // return redirect("/", { headers });
-  return redirect("/", {
-    headers: {
-      "Set-Cookie": await authCookie.commitSession(session),
-    },
-  });
+  return redirect("/sign-in");
 };
 
-const SignIn = () => {
+const ForgotPassword = () => {
   const actionData = useActionData<typeof action>();
 
   let { t } = useTranslation();
@@ -81,10 +67,6 @@ const SignIn = () => {
   } = useRemixForm<FormData>({
     mode: "onSubmit",
     resolver,
-    defaultValues: {
-      email: "rem@mail.com",
-      password: "password",
-    },
   });
 
   const changeLanguage = (lng: string) => {
@@ -127,9 +109,9 @@ const SignIn = () => {
       <div className="max-w-2xl mx-auto">
         <div className="flex flex-col px-32 justify-center">
           <div className="mb-6 mt-32 space-y-2">
-            <h4 className="text-xl font-semibold">{t("sign_in_header")}</h4>
+            <h4 className="text-xl font-semibold">Reset Password</h4>
             <p className="text-sm text-gray-600">
-              Use your email and password to access
+              Enter your email to reset password
             </p>
             <>
               {actionData && (
@@ -157,30 +139,14 @@ const SignIn = () => {
                 />
               )}
             />
-            <Controller
-              name="password"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input
-                  label={t("password")}
-                  size="sm"
-                  {...field}
-                  isRequired
-                  type="password"
-                  isInvalid={!!errors.password?.message}
-                  errorMessage={errors?.password?.message?.toString()}
-                />
-              )}
-            />
             <div className="my-4">
               <Button type="submit" className="w-full" color="primary">
-                {t("sign_in")}
+                Reset Password
               </Button>
             </div>
             <div className="flex justify-center items-center">
-              <NextLink as={Link} to="/forgot-password" className="text-xs">
-                Reset Password
+              <NextLink as={Link} to="/sign-in" className="text-xs">
+                Sign In
               </NextLink>
             </div>
           </Form>
@@ -190,4 +156,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default ForgotPassword;

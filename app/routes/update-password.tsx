@@ -1,14 +1,6 @@
 import { ActionFunctionArgs, json } from "@remix-run/node";
-import {
-  ClientLoaderFunctionArgs,
-  Form,
-  Link,
-  redirect,
-  useActionData,
-} from "@remix-run/react";
-import { createSupabaseServerClient } from "~/supabase.server";
+import { Form, Link, redirect, useActionData } from "@remix-run/react";
 import * as zod from "zod";
-import { signInSchema } from "~/form-schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getValidatedFormData, useRemixForm } from "remix-hook-form";
 import { Button, Input, Link as NextLink } from "@nextui-org/react";
@@ -16,22 +8,56 @@ import { Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import i18next from "node_modules/i18next";
-import { clearCategories } from "~/utils/cache/dexie-cache";
-import { authCookie, supabaseClient } from "~/services/supabase-auth.server";
-import { setAuthSession } from "~/modules/supabase-auth.server";
+import { errSession } from "~/flash.session";
+import { supabaseClient } from "~/services/supabase-auth.server";
 
-type FormData = zod.infer<typeof signInSchema>;
-const resolver = zodResolver(signInSchema);
+export const loader = async ({ request }: ActionFunctionArgs) => {
+  const url = new URL(request.url);
+  const code = url.searchParams.get("token_hash");
+  const erSession = await errSession.getSession(request.headers.get("Cookie"));
 
-// clear data
-export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
-  await clearCategories();
-  return {};
+  if (code) {
+    const { error } = await supabaseClient.auth.verifyOtp({
+      token_hash: code,
+      type: "email",
+    });
+
+    if (error) {
+      erSession.flash("error", error.status!.toString());
+      return redirect("/sign-in", {
+        headers: {
+          "Set-Cookie": await errSession.commitSession(erSession),
+        },
+      });
+    }
+
+    return {};
+  }
+  return redirect("/sign-in");
 };
+
+const resetSchema = zod
+  .object({
+    password: zod
+      .string()
+      .min(6, { message: "Must be 6 or more characters long" }),
+    repeat_password: zod
+      .string()
+      .min(6, { message: "Must be 6 or more characters long" }),
+  })
+  .refine((data) => data.password === data.repeat_password, {
+    message: "Passwords do not match",
+    path: ["repeat_password"], // path of error
+  });
+
+type FormData = zod.infer<typeof resetSchema>;
+const resolver = zodResolver(resetSchema);
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   // const { supabaseClient, headers } = createSupabaseServerClient(request);
-  const session = await authCookie.getSession(request.headers.get("Cookie"));
+  const url = new URL(request.url);
+  const token = url.searchParams.get("token_hash") as string;
+
   const {
     errors,
     data,
@@ -42,13 +68,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ errors, defaultValues, error: null });
   }
 
-  // const { error } = await supabaseClient.auth.signInWithPassword({
-  //   email: data.email,
-  //   password: data.password,
-  // });
-
-  const { data: nData, error } = await supabaseClient.auth.signInWithPassword({
-    email: data.email,
+  const { data: updateData, error } = await supabaseClient.auth.updateUser({
     password: data.password,
   });
 
@@ -56,20 +76,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ success: false, error: error?.message });
   }
 
-  session.set("auth", {
-    access_token: nData.session.access_token,
-    refresh_token: nData.session.refresh_token,
-  });
-
-  // return redirect("/", { headers });
-  return redirect("/", {
-    headers: {
-      "Set-Cookie": await authCookie.commitSession(session),
-    },
-  });
+  return redirect("/sign-in");
 };
 
-const SignIn = () => {
+const UpdatePassword = () => {
   const actionData = useActionData<typeof action>();
 
   let { t } = useTranslation();
@@ -81,10 +91,6 @@ const SignIn = () => {
   } = useRemixForm<FormData>({
     mode: "onSubmit",
     resolver,
-    defaultValues: {
-      email: "rem@mail.com",
-      password: "password",
-    },
   });
 
   const changeLanguage = (lng: string) => {
@@ -127,9 +133,9 @@ const SignIn = () => {
       <div className="max-w-2xl mx-auto">
         <div className="flex flex-col px-32 justify-center">
           <div className="mb-6 mt-32 space-y-2">
-            <h4 className="text-xl font-semibold">{t("sign_in_header")}</h4>
+            <h4 className="text-xl font-semibold">Update Password</h4>
             <p className="text-sm text-gray-600">
-              Use your email and password to access
+              Enter your email to reset password
             </p>
             <>
               {actionData && (
@@ -143,21 +149,6 @@ const SignIn = () => {
             className="grid grid-flow-row gap-4"
           >
             <Controller
-              name="email"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input
-                  label={t("email")}
-                  size="sm"
-                  {...field}
-                  isRequired
-                  isInvalid={!!errors.email?.message}
-                  errorMessage={errors?.email?.message?.toString()}
-                />
-              )}
-            />
-            <Controller
               name="password"
               control={control}
               rules={{ required: true }}
@@ -167,20 +158,34 @@ const SignIn = () => {
                   size="sm"
                   {...field}
                   isRequired
-                  type="password"
                   isInvalid={!!errors.password?.message}
                   errorMessage={errors?.password?.message?.toString()}
                 />
               )}
             />
+            <Controller
+              name="repeat_password"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input
+                  label={t("repeat_password")}
+                  size="sm"
+                  {...field}
+                  isRequired
+                  isInvalid={!!errors.repeat_password?.message}
+                  errorMessage={errors?.repeat_password?.message?.toString()}
+                />
+              )}
+            />
             <div className="my-4">
               <Button type="submit" className="w-full" color="primary">
-                {t("sign_in")}
+                Update Password
               </Button>
             </div>
             <div className="flex justify-center items-center">
-              <NextLink as={Link} to="/forgot-password" className="text-xs">
-                Reset Password
+              <NextLink as={Link} to="/sign-in" className="text-xs">
+                Sign In
               </NextLink>
             </div>
           </Form>
@@ -190,4 +195,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default UpdatePassword;
