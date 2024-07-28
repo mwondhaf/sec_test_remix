@@ -9,6 +9,7 @@ import {
 } from "@remix-run/react";
 import { Incident } from "types";
 import { DetailTopBar, FilterBar, ListIncident } from "~/components";
+import i18nextServer from "~/modules/i18next.server";
 import { supabaseClient } from "~/services/supabase-auth.server";
 import { profileSessionData } from "~/sessions/session.server";
 import { createSupabaseServerClient } from "~/supabase.server";
@@ -20,8 +21,9 @@ import {
 } from "~/utils/cache/dexie-cache";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  // const { supabaseClient } = createSupabaseServerClient(request);
   const { active_profile } = await profileSessionData(request);
+  let locale = await i18nextServer.getLocale(request);
+  let isEnLocale = locale === "en";
 
   const url = new URL(request.url);
   const severity = url.searchParams.get("severity");
@@ -43,8 +45,21 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       });
     }
 
+    let finalIncidents = !isEnLocale
+      ? incidents.map((incident) => {
+          return {
+            ...incident,
+            description: incident.description_ar,
+            action: incident.action_ar,
+            reporter_name: incident.reporter_name_ar,
+            incident_location: incident.incident_location_ar,
+          };
+        })
+      : incidents;
+
     return json({
-      incidents: (incidents as unknown as Incident[]) ?? ([] as Incident[]),
+      incidents:
+        (finalIncidents as unknown as Incident[]) ?? ([] as Incident[]),
     });
   }
 
@@ -63,8 +78,24 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     });
   }
 
+  let finalIncidents = !isEnLocale
+    ? incidents.map((incident) => {
+        return {
+          ...incident,
+          description: incident.description_ar,
+          action: incident.action_ar,
+          reporter_name: incident.reporter_name_ar,
+          incident_location: incident.incident_location_ar,
+          category: {
+            ...incident.category,
+            name: incident.category.name_ar,
+          },
+        };
+      })
+    : incidents;
+
   return json({
-    incidents: (incidents as unknown as Incident[]) ?? ([] as Incident[]),
+    incidents: (finalIncidents as unknown as Incident[]) ?? ([] as Incident[]),
   });
 };
 
@@ -144,7 +175,7 @@ const Layout = () => {
         <div className="col-span-2 px-4 py-2 flex items-center gap-2">
           <FilterBar />
         </div>
-        <div className="col-span-4 border-l py-2 px-4">
+        <div className="col-span-4 border-l border-r py-2 px-4">
           <DetailTopBar />
         </div>
       </div>
@@ -177,7 +208,7 @@ const Layout = () => {
             </>
           )}
         </div>
-        <div className="col-span-4 border-l px-4">
+        <div className="col-span-4 border-l border-r px-4">
           <Outlet />
         </div>
       </div>

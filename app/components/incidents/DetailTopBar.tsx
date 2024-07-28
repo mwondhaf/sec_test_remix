@@ -9,11 +9,13 @@ import {
   useParams,
 } from "@remix-run/react";
 import { File, MailPlus, Printer, Trash2Icon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const DetailTopBar = () => {
   const { incidentId } = useParams();
   const matches = useMatches();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const editPage = matches.some(
     (match) => match.pathname === `/incidents/${incidentId}/edit-incident`
@@ -34,7 +36,7 @@ const DetailTopBar = () => {
                 as={Link}
                 to={`${incidentId}/edit-incident`}
               >
-                Edit
+                {t("edit")}
               </Button>
             ) : (
               <Button

@@ -3,6 +3,7 @@ import { Link, useLocation, useMatches } from "@remix-run/react";
 import clsx from "clsx";
 import dayjs from "dayjs";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Incident } from "types";
 
 interface ListIncidentProps {
@@ -12,14 +13,19 @@ interface ListIncidentProps {
 const ListIncident: React.FC<ListIncidentProps> = ({ incident }) => {
   const location = useLocation();
   const matches = useMatches();
+  let { t, i18n } = useTranslation();
+
+  const locale = i18n.language; // Get the current language from i18n
+  const isEnLocale = locale === "en";
 
   const destination = location.search.includes("?")
     ? `/incidents/${incident.id}${location.search}`
     : `/incidents/${incident.id}`;
 
-  const incident_time = dayjs(incident.incident_time).format(
-    "DD-MM-YYYY HH:mm"
-  );
+  const incident_time = dayjs(incident.incident_time)
+    .locale(isEnLocale ? "en" : "ar")
+    .format("DD-MM-YYYY HH:mm");
+
   const currentlySelected = matches.some(
     (match) => match.pathname === `/incidents/${incident.id}`
   );

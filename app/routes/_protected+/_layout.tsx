@@ -34,8 +34,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     error,
   } = await supabaseClient.auth.getUser();
 
-  console.log({ user });
-
   if (!user) {
     return redirect("/sign-in");
   }

@@ -26,8 +26,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const token = url.searchParams.get("token") as string;
 
-  console.log(token);
-
   if (!token) {
     return redirect("/requests");
   }
@@ -40,8 +38,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       headers: { "Set-Cookie": await errSession.commitSession(session) },
     });
   }
-
-  console.log({ data });
 
   if (data.approval_for === "cctv") {
     return json({
@@ -65,8 +61,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const ref_id = formData.get("ref_id") as string;
   const id = formData.get("id") as string;
   const approver_email = formData.get("approver_email") as string;
-
-  console.log({ approver_email });
 
   switch (intent) {
     case "cctv":

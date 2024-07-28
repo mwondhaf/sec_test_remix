@@ -73,7 +73,6 @@ export const setIncident = async (incident: Incident) => {
     // Validate the incident before setting it
     createIncidentSchema.parse(incident);
     await db.incidents.put(incident);
-    console.log("Updated incident");
   } catch (error) {
     console.error("Error setting incident in cache:", error);
   }

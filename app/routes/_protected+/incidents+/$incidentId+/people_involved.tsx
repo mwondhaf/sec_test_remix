@@ -3,7 +3,6 @@ import { ClientLoaderFunctionArgs, useLoaderData } from "@remix-run/react";
 import { PersonInvolved } from "types";
 import { PeopleInvolvedList } from "~/components";
 import { useFetchIncidents } from "~/helpers/fetcher.server";
-import { createSupabaseServerClient } from "~/supabase.server";
 import { getPeopleInvolvedByIncidentId } from "~/utils/cache/dexie-cache";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {

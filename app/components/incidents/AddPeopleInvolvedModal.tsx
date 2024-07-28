@@ -13,11 +13,13 @@ import {
 import { Form, useMatches, useParams } from "@remix-run/react";
 import { countries } from "~/utils/countries-json";
 import { Department } from "types";
+import { useTranslation } from "react-i18next";
 
 export default function AddPeopleInvolvedModal() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const matches = useMatches();
   const { incidentId } = useParams();
+  let { t } = useTranslation();
 
   const foundData = matches.find(
     (match) => match.pathname === `/incidents/${incidentId}`
@@ -26,7 +28,7 @@ export default function AddPeopleInvolvedModal() {
   return (
     <>
       <div className="flex flex-wrap gap-3">
-        <Button onPress={onOpen}>Add Person Involved</Button>
+        <Button onPress={onOpen}>{t("add_person_involved")}</Button>
       </div>
       <Modal
         isDismissable={false}
@@ -41,20 +43,20 @@ export default function AddPeopleInvolvedModal() {
               method="post"
             >
               <ModalHeader className="flex flex-col gap-1">
-                Person Involved
+                {t("person_involved")}
               </ModalHeader>
               <ModalBody>
                 <input type="hidden" name="intent" value={"add_person"} />
                 <input type="hidden" name="incident_id" value={incidentId} />
-                <Input name="name" label="Name" size="sm" isRequired />
+                <Input name="name" label={t("name")} size="sm" isRequired />
 
-                <Input name="id_number" label="ID Number" size="sm" />
+                <Input name="id_number" label={t("id_number")} size="sm" />
 
                 <Select
                   // @ts-expect-error
                   items={foundData?.data?.departments as Department[]}
-                  label="Person Department"
-                  placeholder="Select a department"
+                  label={t("person_dept")}
+                  placeholder={t("select_dept")}
                   name="person_dept"
                   isRequired
                 >
@@ -68,21 +70,21 @@ export default function AddPeopleInvolvedModal() {
                 <Select
                   name="nationality"
                   items={countries}
-                  label="Nationality"
-                  placeholder="Select a country"
+                  label={t("nationality")}
+                  placeholder={t("select_country")}
                 >
                   {(country) => (
                     <SelectItem key={country.code}>{country.name}</SelectItem>
                   )}
                 </Select>
-                <Input name="remarks" label="Remarks" size="sm" />
+                <Input name="remarks" label={t("remarks")} size="sm" />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button type="submit" color="primary" onPress={onClose}>
-                  Add
+                  {t("add")}
                 </Button>
               </ModalFooter>
             </Form>

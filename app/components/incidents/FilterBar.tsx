@@ -13,6 +13,7 @@ import {
 } from "@radix-ui/react-icons";
 import { useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useDebouncedCallback } from "use-debounce";
 
 interface FilterBarProps {}
@@ -23,8 +24,22 @@ const FilterBar: React.FC<FilterBarProps> = (props) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const params = useParams();
+  const { t } = useTranslation();
 
   const { incidentId } = params;
+
+  const severity_name = (severity: string) => {
+    switch (severity) {
+      case "Low":
+        return t("low");
+      case "Medium":
+        return t("medium");
+      case "High":
+        return t("high");
+      default:
+        return "success";
+    }
+  };
 
   const debounced = useDebouncedCallback(
     (value) => {
@@ -49,7 +64,7 @@ const FilterBar: React.FC<FilterBarProps> = (props) => {
   return (
     <>
       <Input
-        placeholder="search"
+        placeholder={t("search")}
         labelPlacement="outside"
         onChange={(e) => debounced(e.target.value)}
         startContent={
@@ -76,7 +91,7 @@ const FilterBar: React.FC<FilterBarProps> = (props) => {
                 });
               }}
             >
-              {severity}
+              {severity_name(severity)}
             </DropdownItem>
           ))}
           <DropdownItem
@@ -84,7 +99,7 @@ const FilterBar: React.FC<FilterBarProps> = (props) => {
               navigate(`/incidents`);
             }}
           >
-            All
+            {t("all")}
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>

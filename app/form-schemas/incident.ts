@@ -33,5 +33,9 @@ export const createIncidentSchema = zod.object({
   category: incidentCategorySchema.optional(),
   updated_at: zod.string().optional(),
   is_resolved: zod.string().optional().or(zod.boolean().optional()),
+  description_ar: zod.string().optional(),
+  action_ar: zod.string().optional(),
+  incident_location_ar: zod.string().optional(),
+  reporter_name_ar: zod.string().optional(),
   // people_involved: personInvolvedSchema.optional(),
 });

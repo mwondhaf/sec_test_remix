@@ -20,7 +20,6 @@ import {
   toCalendarDateTime,
 } from "@internationalized/date";
 import React, { useEffect } from "react";
-import { createSupabaseServerClient } from "~/supabase.server";
 import * as zod from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createIncidentSchema } from "~/form-schemas";
@@ -41,6 +40,11 @@ import {
 } from "~/utils/cache/dexie-cache";
 import { profileSessionData } from "~/sessions/session.server";
 import { supabaseClient } from "~/services/supabase-auth.server";
+import {
+  translateArToEn,
+  translateEnToAr,
+} from "~/services/libretranslate.server";
+import i18nextServer from "~/modules/i18next.server";
 
 type FormData = zod.infer<typeof createIncidentSchema>;
 const resolver = zodResolver(createIncidentSchema);
@@ -92,7 +96,10 @@ clientLoader.hydrate = true;
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   // const { supabaseClient } = createSupabaseServerClient(request);
+  let locale = await i18nextServer.getLocale(request);
   const { active_profile } = await profileSessionData(request);
+
+  let isEnLocale = locale === "en";
 
   const url = new URL(request.url);
   const inc_time = url.searchParams.get("inc_time");
@@ -108,21 +115,47 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ errors, defaultValues, error: null });
   }
 
+  const finalData = {
+    ...formData,
+    entity_id: active_profile?.entities!.id,
+    compiler_id: active_profile?.id,
+    incident_close_time: close_time,
+    incident_time: inc_time,
+    // english
+    description: isEnLocale
+      ? formData.description
+      : await translateArToEn(formData.description),
+    action: isEnLocale
+      ? formData.action
+      : await translateArToEn(formData.action),
+    reporter_name: isEnLocale
+      ? formData.reporter_name
+      : await translateArToEn(formData.reporter_name),
+    incident_location: isEnLocale
+      ? formData.incident_location
+      : await translateArToEn(formData.incident_location),
+    // arabic
+    description_ar: isEnLocale
+      ? await translateEnToAr(formData.description)
+      : formData.description,
+    action_ar: isEnLocale
+      ? await translateEnToAr(formData.action)
+      : formData.action,
+    reporter_name_ar: isEnLocale
+      ? await translateEnToAr(formData.reporter_name)
+      : formData.reporter_name,
+    incident_location_ar: isEnLocale
+      ? await translateEnToAr(formData.incident_location)
+      : formData.incident_location,
+  };
+
   const { data, error } = await supabaseClient
     .from("incidents")
-    .insert({
-      ...formData,
-      entity_id: active_profile?.entities!.id,
-      compiler_id: active_profile?.id,
-      incident_close_time: close_time,
-      incident_time: inc_time,
-    })
+    .insert({ ...finalData })
     .select()
     .single();
 
   if (error) {
-    console.log(error.message);
-
     return json({ error });
   }
 

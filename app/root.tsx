@@ -21,6 +21,11 @@ import i18next, { localeCookie } from "./modules/i18next.server";
 import { useTranslation } from "react-i18next";
 import { useChangeLanguage } from "remix-i18next/react";
 import "@fontsource-variable/inter";
+import "dayjs/locale/ar";
+import preParsePostFormat from "dayjs/plugin/preParsePostFormat";
+import dayjs from "dayjs";
+dayjs.extend(preParsePostFormat);
+
 // import "@fontsource/fira-sans";
 
 export const links: LinksFunction = () => [

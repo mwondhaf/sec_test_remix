@@ -60,7 +60,7 @@ export type Incident = {
   reporter_name: string;
   action: string;
   updated_at: string;
-  category?: Pick<IncidentCategory, "name">;
+  category?: Pick<IncidentCategory, "name", "name_ar">;
   reporter_department?: Department;
   compiler?: Profile;
   editor?: Profile;
@@ -68,6 +68,10 @@ export type Incident = {
   is_resolved: boolean;
   incident_type_id: Pick<IncidentCategory, "incident_type_id">;
   created_at: string;
+  description_ar?: string;
+  incident_location_ar?: string;
+  reporter_name_ar?: string;
+  action_ar?: string;
 };
 
 export type PersonInvolved = {
@@ -89,6 +93,7 @@ export type IncidentCategory = {
   readonly id: number;
   name: string;
   incident_type_id: number;
+  name_ar?: string;
 };
 
 export type Department = {

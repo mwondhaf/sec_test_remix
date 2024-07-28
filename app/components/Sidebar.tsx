@@ -25,10 +25,12 @@ import {
   Settings2,
 } from "lucide-react";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Profile } from "types";
 
 const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
   const location = useLocation();
+  const { t } = useTranslation();
 
   const links = [
     {
@@ -48,15 +50,15 @@ const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
       href: "/search",
     },
     {
-      name: "Work Permits",
+      name: "Work",
       href: "/permits",
     },
     {
-      name: "CCTV Requests",
+      name: "CCTV",
       href: "/cctv",
     },
     {
-      name: "Access Requests",
+      name: "Access",
       href: "/permits",
     },
     {
@@ -70,10 +72,10 @@ const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
       <div className="space-y-10">
         <div className="px-4">
           <h2 className="font-bold text-2xl uppercase text-primary-700">
-            SECURITY
+            {t("security")}
           </h2>
           <p className="text-xs uppercase font-bold text-primary-600">
-            Management System
+            {t("management_system")}
           </p>
         </div>
         <div className="flex flex-col space-y-1">
@@ -90,11 +92,11 @@ const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
                   <FileBarChart2 />
                 ) : link.name === "Search" ? (
                   <Search />
-                ) : link.name === "Work Permits" ? (
+                ) : link.name === "Work" ? (
                   <Construction />
-                ) : link.name === "CCTV Requests" ? (
+                ) : link.name === "CCTV" ? (
                   <Cctv />
-                ) : link.name === "Access Requests" ? (
+                ) : link.name === "Access" ? (
                   <Key />
                 ) : (
                   <Settings2 />
@@ -112,7 +114,7 @@ const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
                   : "text-gray-500"
               )}
             >
-              {link.name}
+              {t(link.name.toLocaleLowerCase())}
             </Button>
           ))}
         </div>
@@ -127,7 +129,7 @@ const Sidebar: React.FC<{ profile: Profile }> = ({ profile }) => {
             startContent={<Plus />}
             className={"flex justify-start"}
           >
-            New Incident
+            {t("new_incident")}
           </Button>
         </div>
       </div>
