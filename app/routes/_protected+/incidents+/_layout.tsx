@@ -7,6 +7,7 @@ import {
   useLoaderData,
   useSearchParams,
 } from "@remix-run/react";
+import { useTranslation } from "react-i18next";
 import { Incident } from "types";
 import { DetailTopBar, FilterBar, ListIncident } from "~/components";
 import i18nextServer from "~/modules/i18next.server";
@@ -166,6 +167,7 @@ clientLoader.hydrate = true;
 const Layout = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { incidents } = useLoaderData<{ incidents: Incident[] }>();
+  const { t } = useTranslation();
 
   const query = searchParams.get("q");
 
@@ -183,7 +185,7 @@ const Layout = () => {
         <div className="h-full overflow-y-auto col-span-2 bg-white">
           {incidents.length === 0 ? (
             <div className="text-center my-10 items-center h-full space-y-4">
-              <h1>No Incidents Found</h1>
+              <h1>{t("no_incidents")}</h1>
               {query && (
                 <>
                   <Button

@@ -47,6 +47,7 @@ export default {
   security: "الأمن",
   management_system: "نظام الإدارة",
   all: "الكل",
+  no_incidents: "لم يتم العثور على حوادث",
 
   low: "منخفض",
   medium: "متوسط",

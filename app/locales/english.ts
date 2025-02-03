@@ -54,4 +54,5 @@ export default {
   category_name: "Category Name",
   create: "Create",
   new_incident_type: "New Incident Type",
+  no_incidents: "No incidents found",
 };

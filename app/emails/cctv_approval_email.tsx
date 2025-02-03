@@ -34,7 +34,7 @@ export const CCTVApprovalEmail = ({
       <Container style={container}>
         <Text style={title}>
           Hi, <strong>{active_request.requestor.full_name}</strong>, is
-          requesting you to approval a request made to security.
+          requesting you to approve a request made to security.
         </Text>
 
         <Section style={section}>

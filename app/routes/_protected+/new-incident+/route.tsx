@@ -45,6 +45,7 @@ import {
   translateEnToAr,
 } from "~/services/libretranslate.server";
 import i18nextServer from "~/modules/i18next.server";
+import { useTranslation } from "react-i18next";
 
 type FormData = zod.infer<typeof createIncidentSchema>;
 const resolver = zodResolver(createIncidentSchema);
@@ -181,6 +182,8 @@ const NewIncident = () => {
   const [closeTime, setCloseTime] = React.useState(dateTimeNow);
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const { t } = useTranslation();
+
   useEffect(() => {
     setSearchParams((prev) => {
       prev.set("inc_time", calculateDateTime(date));
@@ -210,8 +213,8 @@ const NewIncident = () => {
   });
 
   return (
-    <div className="p-4 space-y-4">
-      <h3 className="text-2xl font-bold text-gray-700">New Incident</h3>
+    <div className="py-4 px-8 space-y-4">
+      <h3 className="text-2xl font-bold text-gray-700">{t("new_incident")}</h3>
       <Form method="post" onSubmit={handleSubmit}>
         <div className="">
           <div className="grid grid-cols-4 gap-4">
